@@ -25,6 +25,28 @@ def macd(close: pl.Expr, fast: int = 12, slow: int = 26, signal: int = 9):
     hist = (macd_line - signal_line).alias("macd_hist")
     return macd_line, signal_line, hist
 
+def cci(high: pl.Expr, low: pl.Expr, close: pl.Expr, period: int = 20) -> pl.Expr:
+    """
+    Commodity Channel Index:
+      TP = (H+L+C)/3
+      CCI = (TP - SMA(TP, n)) / (0.015 * MeanDeviation(TP, n))
+    MeanDeviation = mean(|TP - SMA(TP)|)
+    """
+    tp = (high + low + close) / 3
+    sma_tp = tp.rolling_mean(window_size=period, min_samples=period)
+    # mean deviation: rolling mean de |TP - SMA|
+    md = (tp - sma_tp).abs().rolling_mean(window_size=period, min_samples=period)
+    return ((tp - sma_tp) / (0.015 * md)).alias(f"cci_{period}")
+
+
+def sma(close: pl.Expr, period: int) -> pl.Expr:
+    return close.rolling_mean(window_size=period, min_samples=period).alias(f"sma_{period}")
+
+
+def ema(close: pl.Expr, period: int) -> pl.Expr:
+    return close.ewm_mean(span=period, adjust=False, min_samples=period).alias(f"ema_{period}")
+
+
 def add_technical_features(df: pl.DataFrame, rsi_period: int = 14) -> pl.DataFrame:
     df = df.sort("timestamp")
     # SMAs / EMAs
