@@ -1,0 +1,69 @@
+# configs/strategies.yaml
+# Definicion de estrategias, costos y metricas para backtesting
+
+strategies:
+  trend_following:
+    enabled: true
+    params:
+      fast_ma: 20
+      slow_ma: 60
+      atr_period: 14
+      atr_multiplier: 1.5
+    signal_rule: "SMA crossover + ATR filter"
+
+  mean_reversion:
+    enabled: true
+    params:
+      rsi_period: 14
+      rsi_oversold: 30
+      rsi_overbought: 70
+      bb_period: 20
+      bb_std: 2.0
+    signal_rule: "RSI + Bollinger Bands"
+
+  ml_threshold:
+    enabled: true
+    model: "xgboost"   # xgboost | lightgbm | sklearn
+    target: "return_60m"  # y_t = P_{t+60}/P_t - 1
+    threshold_long: 0.001   # expected_return > 0.001 -> LONG
+    threshold_short: -0.001 # expected_return < -0.001 -> SHORT
+    description: "Separa FEATURES -> TARGET -> TRAINING -> PREDICTION -> TRADING RULE -> BACKTEST"
+
+backtest:
+  initial_capital: 10000.0
+  fees:
+    maker: 0.001   # 0.10% spot Binance sin BNB
+    taker: 0.001
+    use_taker: true
+  slippage:
+    bps: 5        # 0.05% por lado, configurable por volumen
+    model: "fixed_bps"  # fixed_bps | atr_based
+  position:
+    type: "fixed_fraction"  # fixed_fraction | volatility_targeting
+    fraction: 1.0
+    max_leverage: 1.0
+    allow_short: true
+  execution:
+    lag: 1        # ejecuta en t+1 para evitar look-ahead bias (close_t -> open_{t+1})
+
+metrics:
+  - pnl
+  - equity_curve
+  - cagr
+  - sharpe
+  - sortino
+  - calmar
+  - max_drawdown
+  - max_drawdown_duration
+  - win_rate
+  - profit_factor
+  - turnover
+  - exposure
+  - fees_total
+  - slippage_total
+
+optimization:
+  method: "optuna"  # optuna | grid | genetic | pso
+  objective: "sharpe"  # sharpe | sortino | calmar | profit_factor
+  n_trials: 100
+  cv: "walk_forward"

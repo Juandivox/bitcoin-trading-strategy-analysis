@@ -1,0 +1,22 @@
+# Data (no commitear ZIPs/parquets grandes)
+data/raw/
+data/processed/*.parquet
+data/features/*.parquet
+*.zip
+*.CHECKSUM
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.ipynb_checkpoints/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# OS
+.DS_Store
+Thumbs.db

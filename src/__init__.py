@@ -1,0 +1,1 @@
+"""bitcoin-trading-research package."""

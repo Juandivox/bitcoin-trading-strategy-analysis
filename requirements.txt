@@ -1,0 +1,22 @@
+# Core
+polars>=1.0
+numpy>=1.24
+pyarrow>=14
+duckdb>=0.10
+requests>=2.31
+tqdm>=4.66
+pyyaml>=6.0
+
+# ML
+scikit-learn>=1.4
+xgboost>=2.0
+lightgbm>=4.0
+
+# Viz / NB
+matplotlib>=3.8
+jupyter>=1.0
+ipykernel>=6.0
+
+# Optional
+mlflow>=2.0
+optuna>=3.5
