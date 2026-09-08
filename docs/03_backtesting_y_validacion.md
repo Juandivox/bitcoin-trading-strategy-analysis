@@ -22,7 +22,7 @@ Fold 3: Train 2018-2022 -> Test 2023
 Fold 4: Train 2018-2023 -> Test 2024
 OOS:    2025-... (nunca tocado hasta decisión final)
 ```
-Implementado en `src/models/training.py:train_predict`.
+Cada fold evalúa las estrategias rule-based (trend / mean-reversion) en el año siguiente (expanding window). El OOS 2025-2026 nunca se toca hasta el final.
 
 ### 3) Walk-forward rolling (alternativa)
 Ventana deslizante de N años (ej. 3 años train -> 1 año test).
@@ -50,13 +50,12 @@ No incluye (futuro):
 - **Profit factor:** `sum(gains)/sum(|losses|)`
 - **Turnover:** `sum(|position.diff|)`
 
-## Separación ML / Estrategia
+## Flujo estrategia -> backtest
 
 ```
-Modelo predictivo:  X -> y_hat (expected_return)
-Regla de trading:   y_hat > +th -> LONG, y_hat < -th -> SHORT, else FLAT
-Backtest:           signal -> position(lag) -> PnL - costos -> métricas
-Optimización:       busca threshold y params que maximicen Sharpe OOS (no in-sample)
+Señal long-only (etapa 1: RSI/MACD/SMA/EMA/CCI; etapa 2: E2-A / E2-C / BH) -> LONG/FLAT
+Backtest:         signal -> position(lag) -> PnL - costos -> métricas
+Optimización:     TPE (mediana OOS Sharpe) o NSGA-II (Pareto); params que maximicen Sharpe OOS (no in-sample)
 ```
 
-Nunca optimizar el modelo mirando el test. El test solo se evalúa una vez.
+Nunca optimizar mirando el test. El test solo se evalúa una vez.

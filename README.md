@@ -31,7 +31,7 @@ python -c "import polars as pl; from src.features import build_features; df=pl.r
 bitcoin-trading-research/
 ├── data/raw|processed|features
 ├── notebooks/01_exploration.ipynb ... 04_results.ipynb
-├── src/ingestion|processing|features|strategies|models|backtesting|evaluation
+├── src/ingestion|processing|features|strategies|backtesting|evaluation
 ├── configs/data.yaml, strategies.yaml
 ├── docs/00_pipeline.md (+ 01,02,03)
 └── requirements.txt
@@ -39,13 +39,13 @@ bitcoin-trading-research/
 
 ## Stack
 
-Polars · NumPy · DuckDB · scikit-learn · XGBoost/LightGBM · matplotlib · Jupyter · (MLflow opcional)
+Polars · NumPy · DuckDB · matplotlib · Jupyter · (Optuna opcional)
 
 ## Notas clave
 
 - **Sin API key.** URLs: `https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1m/...zip`
 - **Microsegundos 2025:** `src/ingestion/binance.py` normaliza `us -> ms` automáticamente.
-- **No random split:** walk-forward en `configs/data.yaml` y `src/models/training.py`.
+- **No random split:** walk-forward en `configs/data.yaml`.
 - **Backtester con fees+slippage:** `src/backtesting/engine.py` (lag=1, sin look-ahead).
 
 ## Referencias

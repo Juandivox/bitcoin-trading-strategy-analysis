@@ -13,22 +13,17 @@ Python 3.10+  (probado en 3.13.2, polars 1.44.1, pyarrow 25.0.1)
 │
 ├── Core ETL / Datos
 │   ├── polars>=1.0          # DataFrames columnares, 10-20x más rápido que pandas; lee/escribe Parquet zstd, rolling/window
-│   ├── numpy>=1.24          # Operaciones vectoriales, soporte sklearn/xgboost
+│   ├── numpy>=1.24          # Operaciones vectoriales
 │   ├── pyarrow>=14          # Backend Parquet para polars.to_pandas()
 │   ├── duckdb>=0.10         # SQL sobre Parquet sin cargar en RAM (memory_limit 4GB, threads 4 en configs/data.yaml:87)
 │   ├── requests>=2.31       # Descargas HTTP Data Vision
 │   ├── tqdm>=4.66           # Barras progreso paralelas
 │   └── pyyaml>=6.0          # Carga configs/*.yaml
 │
-├── Machine Learning
-│   ├── scikit-learn>=1.4    # Baseline RF, TimeSeriesSplit, métricas
-│   ├── xgboost>=2.0         # Modelo principal (n_estimators 500, lr 0.05)
-│   └── lightgbm>=4.0        # Alternativa GBM
-│
 ├── Visualización / Notebooks
 │   ├── matplotlib>=3.8      # Equity, drawdown, distribuciones
 │   ├── jupyter>=1.0 + ipykernel>=6.0  # notebooks 01..04
-│   └── (opcional) mlflow>=2.0, optuna>=3.5  # tracking + optimización hiperparámetros
+│   └── (opcional) optuna>=3.5  # optimización hiperparámetros rule-based
 │
 └── Dev
     ├── pytest (implícito vía tests/test_bincance_timestamps.py:1)
@@ -100,20 +95,18 @@ E:\bitcoin-trading-research\
 │   │   └── resample.py                # 1m → 5m/15m/1h/4h/1d (OHLC first/max/min/last, volúmenes sum, recalcula ratios/cvd)
 │   │
 │   ├── features/                      # ← Ingeniería (sin leakage)
-│   │   ├── __init__.py                # build_features(df, horizon=60) → pipeline
-│   │   ├── price.py                   # return_1/5/15/60, log_return, gap, target_return_60m (=P_{t+60}/P_t-1)
+│   │   ├── __init__.py                # build_features(df) → pipeline
+│   │   ├── price.py                   # return_1/5/15/60, log_return, gap
 │   │   ├── volume.py                  # buy_ratio, imbalance, volume_ma/zscore, avg_trade_size
 │   │   ├── cvd.py                     # volume_delta, cvd=cumsum(delta), cvd_ma/dev, divergencias
 │   │   ├── volatility.py              # realized_vol, true_range, atr_14, vwap
 │   │   └── technical.py               # sma/ema, rsi, macd, bbands, sma_diff
 │   │
-│   ├── strategies/                    # ← Señales {-1,0,1} (sin look-ahead)
-│   │   ├── trend_following.py         # SMA crossover (20/60) + filtro ATR
-│   │   └── mean_reversion.py          # RSI + Bollinger
-│   │
-│   ├── models/                        # ← ML separado de estrategia
-│   │   ├── training.py                # walk_forward_splits, prepare_xy, train_predict (xgboost/lightgbm/rf), to_trading_signal (threshold)
-│   │   └── prediction.py              # save/load pickle, predict()
+│   ├── strategies/                    # ← Señales long-only 0/1 (fiel a notebooks/05-06)
+│   │   ├── individuals.py             # Etapa 1: RSI/MACD/SMA/EMA/CCI aislados (EXP01_BEST)
+│   │   ├── e2a_composite.py           # Etapa 2: CCI+SMA+Vol+ATR (E2A_A1 paper, E2A_A2_BEST TPE150)
+│   │   ├── e2c_winners.py             # Etapa 2: SMA regimen + MACD trigger + RSI filtro
+│   │   └── buy_and_hold.py            # Benchmark: siempre LONG
 │   │
 │   ├── backtesting/                   # ← Motor aislado
 │   │   ├── engine.py                  # backtest(df, lag=1) → position, strategy_ret, equity, bh_equity
@@ -139,12 +132,10 @@ data/raw/spot/{monthly,daily}/klines/BTCUSDT/1m/*.zip
 data/processed/btcusdt_1m.parquet  (maestro 1m, UTC, order-flow derivado)
         ├─→ resample.py  →  data/processed/btcusdt_{5m,1h,1d}.parquet
         └─→ features/build_features  →  data/features/btcusdt_1m_features.parquet
-                                        (82 cols: 65 features + 17 base + target)
+                                        (81 cols: 64 features + 17 base)
                 ↓
-        ┌───────┴────────┐
-   strategies/         models/training.py (walk-forward folds de configs/data.yaml)
-   (SMA/RSI)           → prediction → to_trading_signal (threshold ±0.001)
-        └───────┬────────┘
+         strategies/ (E2-A / E2-C / BH -> señales 0/1 long-only)
+                ↓
          backtesting/engine.py (lag=1, fees 0.10% + slippage 5bps)
                 ↓
          evaluation/statistics + plots → notebooks/04_results
@@ -153,7 +144,6 @@ data/processed/btcusdt_1m.parquet  (maestro 1m, UTC, order-flow derivado)
 **Convenciones:**
 - `timestamp` siempre `Datetime(ns, UTC)` apertura de vela; `close_timestamp` = `timestamp + interval -1ms`.
 - Derivadas order-flow **siempre** recalculadas post-resample: `taker_sell = volume - taker_buy`, `buy_ratio = taker_buy/volume`, `volume_delta = 2*taker_buy - volume`, `cvd = cumsum(delta)`.
-- `target_return_60m` nunca entra en `feature_cols` (ver `price.py:add_target`).
 - Todo `rolling_*` y `ewm_*` usa `min_samples` para evitar filas con NaN al inicio.
 
 ---
@@ -172,8 +162,8 @@ duckdb: {memory_limit: 4GB, threads: 4}
 
 **`configs/strategies.yaml:1`** — parámetros reproducibles:
 ```yaml
-strategies: {trend_following: {fast_ma:20, slow_ma:60, atr_period:14, atr_multiplier:1.5}, mean_reversion: {rsi:14/30/70, bb:20/2.0}, ml_threshold: {model: xgboost, target: return_60m, threshold_long:0.001, threshold_short:-0.001}}
-backtest: {initial_capital:10000, fees: {maker:0.001, taker:0.001}, slippage: {bps:5, model: fixed_bps}, execution: {lag:1}, position: {allow_short:true}}
+strategies: {e2a_composite: {A1 paper CCI20/-100/100 SMA20/50 Vol20/0.5 ATR14/2.0}, e2c_winners: {SMA20/150 RSI14/70 MACD12/26/9}, buy_and_hold: {siempre LONG}} + individuals {rsi 27/41/86, macd 30/46/25, sma 7/228, ema 2/190, cci 39/-64/143}
+backtest: {initial_capital:10000, fees: {maker:0.001, taker:0.001}, slippage: {bps:5, model: fixed_bps}, execution: {lag:1}, position: {allow_short:false}}
 metrics: [pnl, equity_curve, cagr, sharpe, sortino, calmar, max_drawdown, win_rate, profit_factor, turnover]
 ```
 
@@ -211,8 +201,8 @@ python -m src.processing.cleaner --raw-dir data/raw --processed data/processed
 
 **Features:**
 ```bash
-python -c "from src.features import build_features; import polars as pl; df=pl.read_parquet('data/processed/btcusdt_1m.parquet'); df=build_features(df, horizon=60).write_parquet('data/features/btcusdt_1m_features.parquet')"
-# btcusdt_1m_features.parquet: 4,747,519 x 82 (418 MB → 2.3 GB)
+python -c "from src.features import build_features; import polars as pl; df=pl.read_parquet('data/processed/btcusdt_1m.parquet'); df=build_features(df).write_parquet('data/features/btcusdt_1m_features.parquet')"
+# btcusdt_1m_features.parquet: 4,747,519 x 81 (418 MB → 2.3 GB)
 ```
 
 ### Artefactos generados
@@ -222,7 +212,7 @@ python -c "from src.features import build_features; import polars as pl; df=pl.r
 | `data/raw/spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2017-08.zip … 2026-07.zip` | 108 mensuales | ~218 MB |
 | `data/raw/spot/daily/klines/BTCUSDT/1m/BTCUSDT-1m-2026-08-01.zip … 2026-09-01.zip` | 32 diarios | ~4 MB |
 | `data/processed/btcusdt_1m.parquet` | 4,747,519 × 17 | 417.9 MB |
-| `data/features/btcusdt_1m_features.parquet` | 4,747,519 × 82 | 2.3 GB |
+| `data/features/btcusdt_1m_features.parquet` | 4,747,519 × 81 | 2.3 GB |
 
 **Conteo anual:**
 ```
@@ -261,7 +251,7 @@ Uso: `df.with_columns(normalize_timestamp_series(pl.col("open_time")).alias("ope
 **17 cols parquet `btcusdt_1m.parquet`:**
 `timestamp(UTC), open_time_ms, close_timestamp, open, high, low, close, volume, quote_volume, trade_count, taker_buy_volume, taker_buy_quote_volume, taker_sell_volume (=volume-taker_buy), taker_sell_quote_volume, buy_ratio, sell_ratio, volume_delta (=taker_buy-taker_sell =2*taker_buy-volume)`
 
-**65 features adicionales en `btcusdt_1m_features.parquet`:** `return_1/5/15/60/240, log_return_*, gap_1m, volume_ma_20/60/240, volume_zscore, trade_count_ma, avg_trade_size, imbalance, cvd/cvd_ma_20/60/240/delta_sum, realized_vol_60/240, true_range/atr_14, _typical/vwap_60, sma_20/50/60/200, ema_*, rsi_14, macd_line/signal/hist, bb_mid/upper/lower/pct, sma_diff + target_return_60m`
+**65 features adicionales en `btcusdt_1m_features.parquet`:** `return_1/5/15/60/240, log_return_*, gap_1m, volume_ma_20/60/240, volume_zscore, trade_count_ma, avg_trade_size, imbalance, cvd/cvd_ma_20/60/240/delta_sum, realized_vol_60/240, true_range/atr_14, _typical/vwap_60, sma_20/50/60/200, ema_*, rsi_14, macd_line/signal/hist, bb_mid/upper/lower/pct, sma_diff`
 
 ---
 
@@ -277,7 +267,6 @@ Train 2018-2022 → Test 2023
 Train 2018-2023 → Test 2024
 OOS 2025-01-01 → hoy (nunca tocado hasta decisión final)
 ```
-Consumido por `src/models/training.py:train_predict()`.
 
 **Backtester `src/backtesting/engine.py:1`:**
 ```python
@@ -288,8 +277,6 @@ strategy_ret = position * (close/close.shift(1)-1) - _cost
 equity = initial_capital * (1+strategy_ret).cum_prod()
 ```
 Métricas en `src/backtesting/metrics.py:1`: `cagr`, `sharpe/sortino` (P=525600 para 1m crypto 24/7), `max_drawdown`, `calmar`, `win_rate`, `profit_factor`, `turnover`.
-
-**Separación ML:** `FEATURES → TARGET(y_t=P_{t+60}/P_t-1) → TRAIN → PRED(expected_return) → TRADING RULE(>|0.001| → LONG/SHORT) → BACKTEST`.
 
 ---
 
@@ -307,7 +294,7 @@ python -m src.processing.cleaner
 # Cargar en scripts
 import polars as pl
 df = pl.read_parquet("data/processed/btcusdt_1m.parquet")                 # 418 MB, rápido
-df = pl.read_parquet("data/features/btcusdt_1m_features.parquet")        # 2.3 GB, con target
+df = pl.read_parquet("data/features/btcusdt_1m_features.parquet")        # 2.3 GB, con features
 df = build_features(pl.read_parquet("data/processed/btcusdt_1m.parquet")) # on-the-fly
 
 # DuckDB sin RAM
@@ -337,4 +324,4 @@ python -m src.processing.resample --input data/processed/btcusdt_1m.parquet --ti
 - Binance Kline docs: https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data
 
 ---
-*AGENTS v2 — 2026-09-02 — cubre stack, arquitectura, configs, ingestión real y reglas. Mantener sincronizado con `requirements.txt`, `configs/*.yaml` y `src/`.*
+*AGENTS v4 — 2026-09-03 — fiel a notebooks/05-06: etapa 1 (RSI/MACD/SMA/EMA/CCI) + etapa 2 (E2-A/E2-C/BH), long-only. Mantener sincronizado con `requirements.txt`, `configs/*.yaml` y `src/`.*

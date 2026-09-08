@@ -21,9 +21,6 @@ cvd                     = cumsum(volume_delta)   # se recalcula tras resample
 ### Features (features/*.py)
 `return_1m/5m/15m/60m/240m`, `log_return_*`, `gap_1m`, `volume_ma_20/60/240`, `volume_zscore`, `trade_count_ma_*`, `avg_trade_size`, `imbalance`, `delta_sum_20/60/240`, `cvd_ma_*`, `cvd_dev_*`, `realized_vol_60/240`, `atr_14`, `vwap_60`, `vwap_dist_60`, `sma_20/50/60/200`, `ema_*`, `rsi_14`, `macd_line/signal/hist`, `bb_upper/lower/mid/pct`
 
-### Target (solo training)
-`target_return_60m = close.shift(-60)/close -1`
-
 ## Validaciones en cleaner.py
 
 - Deduplicación por `open_time_ms`

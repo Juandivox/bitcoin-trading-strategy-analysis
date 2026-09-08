@@ -1,33 +1,64 @@
 # configs/strategies.yaml
 # Definicion de estrategias, costos y metricas para backtesting
+# Fiel a notebooks/05 (etapa 1: indicadores aislados) y 06 (etapa 2: E2-A / BH / E2-C).
+# Todo LONG-ONLY (0/1): allow_short=false.
 
+# Etapa 1 — indicadores aislados (best params TPE Exp01, docs/experimento_01_resumen.md)
+individuals:
+  rsi:
+    enabled: true
+    params: {period: 27, oversold: 41, overbought: 86, exit_level: 50}
+    signal_rule: "RSI cruza arriba OS -> LONG; RSI >= 50 -> FLAT"
+  macd:
+    enabled: true
+    params: {fast: 30, slow: 46, signal: 25}
+    signal_rule: "MACD cruza arriba Signal -> LONG; cruza abajo -> FLAT"
+  sma:
+    enabled: true
+    params: {fast: 7, slow: 228, kind: sma}
+    signal_rule: "SMA_fast > SMA_slow -> LONG else FLAT"
+  ema:
+    enabled: true
+    params: {fast: 2, slow: 190, kind: ema}
+    signal_rule: "EMA_fast > EMA_slow -> LONG else FLAT"
+  cci:
+    enabled: true
+    params: {period: 39, entry: -64, exit: 143}
+    signal_rule: "CCI cruza arriba entry -> LONG; CCI > exit -> FLAT"
+
+# Etapa 2 — comparacion de 3 sistemas completos
 strategies:
-  trend_following:
+  buy_and_hold:
     enabled: true
-    params:
-      fast_ma: 20
-      slow_ma: 60
-      atr_period: 14
-      atr_multiplier: 1.5
-    signal_rule: "SMA crossover + ATR filter"
+    params: {}
+    signal_rule: "Siempre LONG (benchmark: hold BTC con el capital)"
 
-  mean_reversion:
+  e2a_composite:
+    enabled: true
+    params: # A1 paper (reproduccion); A2 optimizado en comentario
+      cci_period: 20
+      cci_entry: -100
+      cci_exit: 100
+      sma_fast: 20
+      sma_slow: 50
+      vol_window: 20
+      vol_z_thr: 0.5
+      atr_period: 14   # stop dinamico: entry - k*ATR (ver src/backtesting/stops.py)
+      atr_k: 2.0
+    # A2 TPE 150 (docs/experimento_02_plan.md): {cci_period: 58, cci_entry: -3, cci_exit: 186, sma_fast: 18, sma_slow: 221, vol_window: 40, vol_z_thr: 0.58, atr_period: 28, atr_k: 2.44}
+    signal_rule: "SMA tendencia + CCI momento + Volumen confirmacion + ATR stop"
+
+  e2c_winners:
     enabled: true
     params:
+      sma_fast: 20
+      sma_slow: 150
       rsi_period: 14
-      rsi_oversold: 30
-      rsi_overbought: 70
-      bb_period: 20
-      bb_std: 2.0
-    signal_rule: "RSI + Bollinger Bands"
-
-  ml_threshold:
-    enabled: true
-    model: "xgboost"   # xgboost | lightgbm | sklearn
-    target: "return_60m"  # y_t = P_{t+60}/P_t - 1
-    threshold_long: 0.001   # expected_return > 0.001 -> LONG
-    threshold_short: -0.001 # expected_return < -0.001 -> SHORT
-    description: "Separa FEATURES -> TARGET -> TRAINING -> PREDICTION -> TRADING RULE -> BACKTEST"
+      rsi_ob: 70
+      macd_fast: 12
+      macd_slow: 26
+      macd_sig: 9
+    signal_rule: "SMA regimen + MACD trigger + RSI filtro (top ganadoras etapa 1)"
 
 backtest:
   initial_capital: 10000.0
@@ -42,7 +73,7 @@ backtest:
     type: "fixed_fraction"  # fixed_fraction | volatility_targeting
     fraction: 1.0
     max_leverage: 1.0
-    allow_short: true
+    allow_short: false   # LONG-ONLY (0/1), fiel a notebooks/05-06
   execution:
     lag: 1        # ejecuta en t+1 para evitar look-ahead bias (close_t -> open_{t+1})
 
@@ -63,7 +94,7 @@ metrics:
   - slippage_total
 
 optimization:
-  method: "optuna"  # optuna | grid | genetic | pso
+  method: "optuna"  # optuna | grid | genetic | pso (TPE mediana OOS Sharpe; NSGA-II Pareto)
   objective: "sharpe"  # sharpe | sortino | calmar | profit_factor
-  n_trials: 100
+  n_trials: 80
   cv: "walk_forward"

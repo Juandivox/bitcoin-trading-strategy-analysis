@@ -1,6 +1,6 @@
 # Experimento 01 - Resumen (auto-generado)
 
-Fecha: 2026-09-01T23:06:31.420010  |  TIMEFRAME=4h  |  Trials TPE=80
+Fecha: 2026-09-08T11:29:47.463500  |  TIMEFRAME=4h  |  Trials TPE=80
 
 | Indicador | Best Params | Median OOS Sharpe | IS Sharpe | HOLDOUT Sharpe | HOLDOUT CAGR | MaxDD | PF |
 |-----------|-------------|-------------------|-----------|---------------|-------------|-------|----|

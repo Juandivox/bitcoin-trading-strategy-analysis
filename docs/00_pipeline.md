@@ -1,6 +1,6 @@
 # Pipeline Bitcoin Trading Research — Documentación Maestra
 
-> **Objetivo:** dataset 1m de BTCUSDT Spot (Binance) desde 2017-08-17 hasta hoy, con order-flow, features, backtester con costos y validación temporal correcta (walk-forward, no random split). Para entrenar bots de trading y tesis UNAB.
+> **Objetivo:** dataset 1m de BTCUSDT Spot (Binance) desde 2017-08-17 hasta hoy, con order-flow, features, backtester con costos y validación temporal correcta (walk-forward, no random split). Para evaluar estrategias rule-based y tesis UNAB.
 
 ---
 
@@ -11,7 +11,7 @@ bitcoin-trading-research/
 ├── data/
 │   ├── raw/          # ZIPs originales de Binance Vision (mensual + diario)
 │   ├── processed/    # Parquet maestros 1m,5m,... (cleaned + resampled)
-│   └── features/     # Dataset con features + target (listo para ML)
+│   └── features/     # Dataset con features (listo para estrategias)
 ├── notebooks/
 │   ├── 01_exploration.ipynb
 │   ├── 02_volume_analysis.ipynb
@@ -21,8 +21,7 @@ bitcoin-trading-research/
 │   ├── ingestion/    # binance.py, download.py
 │   ├── processing/   # cleaner.py, resample.py
 │   ├── features/     # price, volume, cvd, volatility, technical
-│   ├── strategies/   # trend_following, mean_reversion
-│   ├── models/       # training, prediction
+│   ├── strategies/   # individuals (etapa 1), e2a/e2c/bh (etapa 2)
 │   ├── backtesting/  # engine, costs, metrics
 │   └── evaluation/   # statistics, plots
 ├── configs/
@@ -136,7 +135,6 @@ def normalize_timestamp_series(s: pl.Series) -> pl.Series:
 | `imbalance` | feature | `delta/volume` |
 | `vwap` | feature | `(HLC3*vol).rolling_sum / vol.sum` |
 | `rsi/macd/bb/at r` | feature | technical.py |
-| `target_return_60m` | target | `P_{t+60}/P_t -1` (solo training, nunca feature) |
 
 **Resampleo:** `resample.py` agrega correctamente a 5m,15m,1h,4h,1d (sum para volúmenes, first/max/min/last para OHLC, recalcula ratios).
 
@@ -198,18 +196,18 @@ python -m src.processing.cleaner --raw-dir data/raw --processed data/processed
 # 3) Resamplear (opcional)
 python -m src.processing.resample --input data/processed/btcusdt_1m.parquet --timeframes 5m,15m,1h,4h,1d
 
-# 4) Features + target (en notebook o script)
+# 4) Features (en notebook o script)
 python -c "
 import polars as pl
 from src.features import build_features
 df = pl.read_parquet('data/processed/btcusdt_1m.parquet')
-df = build_features(df, horizon=60)
+df = build_features(df)
 df.write_parquet('data/features/btcusdt_1m_features.parquet')
 print(df.shape)
 "
 
-# 5) Entrenar (walk-forward) y backtest
-# ver notebooks/04_results.ipynb y src/models/training.py + src/backtesting/engine.py
+# 5) Backtest estrategias rule-based
+# ver notebooks/04_results.ipynb y src/backtesting/engine.py
 ```
 
 ---
@@ -237,13 +235,13 @@ Train        Test
 2018-2023 -> 2024
 ```
 
-Configurado en `configs/data.yaml:validation.folds` y consumido por `src/models/training.py:train_predict`.
+Configurado en `configs/data.yaml:validation.folds`.
 
-Cada fold entrena con todo el pasado y evalúa en el año siguiente (expanding window). El OOS 2025-2026 nunca se toca hasta el final.
+Cada fold evalúa las estrategias rule-based con todo el pasado y testea en el año siguiente (expanding window). El OOS 2025-2026 nunca se toca hasta el final.
 
 ---
 
-## 8. Backtester (separado del modelo)
+## 8. Backtester (estrategias rule-based)
 
 **Motor:** `src/backtesting/engine.py:backtest`
 
@@ -274,21 +272,20 @@ ret_t = position_{t-1} * (price_t/price_{t-1} -1) - turnover*cost
 
 ---
 
-## 9. ML — separación explícita FEATURES → TARGET → TRADING RULE
+## 9. Estrategias (fiel a notebooks/05-06) -> BACKTEST
 
+Etapa 1 — indicadores aislados, long-only (`src/strategies/individuals.py`, best TPE en `configs/strategies.yaml:individuals`):
+`RSI(27/41/86) | MACD(30/46/25) | SMA(7/228) | EMA(2/190) | CCI(39/-64/143)`
+
+Etapa 2 — 3 sistemas completos (`notebooks/04_results.ipynb` los compara):
 ```
-FEATURES        TARGET              TRAINING   PREDICTION   TRADING RULE   BACKTEST
-return_1m  ─┐                ┌─> XGBoost ─┐
-return_5m   │  y_t=P_{t+60}/P_t-1  │         │ expected=+0.0032
-volume_zscore + ─>  y_t  ──> TRAIN ─> PRED ─> threshold ─> LONG/SHORT/FLAT ─> BT
-CVD         │                │         │ expected=-0.0015
-RSI/MACD   ─┘                └────────┘
+E2-A: CCI + SMA + Volumen -> LONG(1)/FLAT(0) + ATR stop dinamico -> BT   (src/strategies/e2a_composite.py)
+E2-C: SMA regimen + MACD trigger + RSI filtro -> LONG/FLAT -> BT          (src/strategies/e2c_winners.py)
+BH:   siempre LONG (hold BTC con el capital, benchmark)                   (src/strategies/buy_and_hold.py)
 ```
 
-- **Target:** `y_t = Close_{t+60}/Close_t -1` (retorno 60m futuro)
-- **Threshold:** `|expected_return| > 0.001` (0.10%) para filtrar ruido
-- **Modelo:** XGBoost / LightGBM / RF (ver `src/models/training.py`)
-- La **estrategia** (threshold) está separada del **modelo predictivo** — metodológicamente importante.
+- Señales `{0,1}` long-only sin look-ahead, ejecución con `lag=1`, fees 10bps + slippage 5bps.
+- Params E2-A: A1 paper `CCI 20/-100/100, SMA 20/50, Vol 20/0.5, ATR 14/2.0`; A2 TPE 150 en `E2A_A2_BEST`.
 
 ---
 
@@ -299,11 +296,9 @@ Python 3.10+
 ├── Polars      (ETL veloz, parquet, rolling)
 ├── NumPy
 ├── DuckDB      (queries sobre parquet sin cargar todo en RAM)
-├── scikit-learn
-├── XGBoost / LightGBM
 ├── matplotlib  (plots equity/drawdown)
 ├── Jupyter
-└── MLflow (opcional, para tracking)
+└── Optuna (opcional, para optimización)
 ```
 
 Ver `requirements.txt` para versiones pinneadas.

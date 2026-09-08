@@ -23,7 +23,7 @@ def backtest(
     fee_bps: float = 10.0,       # 10 bps = 0.10%
     slippage_bps: float = 5.0,   # 5 bps
     lag: int = 1,
-    allow_short: bool = True,
+    allow_short: bool = False,   # LONG-ONLY (0/1), fiel a notebooks/05-06
 ) -> pl.DataFrame:
     """
     Retorna DataFrame con equity curve y retornos.
@@ -72,11 +72,3 @@ def backtest(
         (pl.col("_bh_growth") * initial_capital).alias("bh_equity")
     )
     return df
-
-def backtest_from_predictions(
-    pred_df: pl.DataFrame,
-    price_col: str = "close",
-    signal_col: str = "signal_ml",
-    **kwargs,
-) -> pl.DataFrame:
-    return backtest(pred_df, signal_col=signal_col, price_col=price_col, **kwargs)

@@ -9,7 +9,7 @@ import polars as pl
 from src.backtesting.metrics import summarize
 
 def compare_strategies(backtests: dict[str, pl.DataFrame]) -> pl.DataFrame:
-    """backtests = {"trend": df_bt, "mr": df_bt, "ml": df_bt}"""
+    """backtests = {"buy_and_hold": df_bt, "e2a": df_bt, "e2c": df_bt} (etapa 2, long-only)"""
     rows = []
     for name, df in backtests.items():
         s = summarize(df)
