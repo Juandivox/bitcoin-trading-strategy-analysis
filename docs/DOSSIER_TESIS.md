@@ -526,6 +526,8 @@ Un solo año excepcional no debe dominar la selección. La mediana exige que el 
 
 ## 7.7 Resultado de la re-selección
 
+Esta tabla compara **dos juegos de parámetros** (el previo y el de la v3), no dos tipos de pronóstico. Ambos se evalúan en las mismas dos ventanas: los folds 2021-2024 (selección) y el holdout 2025-2026 (test final). Todo es backtest; la diferencia es qué parámetros se usan.
+
 | Estrategia | Mediana OOS previa | Mediana OOS v3 | Holdout previo | Holdout v3 |
 |---|---:|---:|---:|---:|
 | RSI | 0,519 | 1,036 | 0,353 | −0,662 |
@@ -539,16 +541,7 @@ Un solo año excepcional no debe dominar la selección. La mediana exige que el 
 - **SMA mejoró en las tres dimensiones.**
 - **RSI empeoró:** mejoró los folds pero su holdout cayó a −0,662.
 
-## 7.8 El PSO con rf=4% como contraejemplo
-
-Se probó una variante PSO con el mismo objetivo (Sharpe con rf=4%) y un solo split 70/30. El resultado fue sobreajuste: buen desempeño in-sample y caída fuerte fuera de muestra.
-
-| | IS70 | OOS30 | FULL | MaxDD |
-|---|---:|---:|---:|---:|
-| PSO (rf=4%) | 1,550 | **−0,105** | 1,182 | −40,11 % |
-| E2-A A2 | 1,567 | **1,412** | 0,872 | −27,93 % |
-
-El PSO mejora apenas el in-sample y pierde dinero fuera de muestra. Por eso queda fuera del universo y se conserva solo como anexo metodológico.
+> **Nota metodológica:** también se probó PSO con un split único; sobreajustó y no forma parte del universo. Se conserva solo como registro metodológico.
 
 ---
 
@@ -675,7 +668,7 @@ A2 tiene un perfil mucho más estable: su peor año es −22,4%, frente a −53,
 
 ![Figura 8. Dos perfiles: win rate vs payoff. SMA está arriba a la izquierda (pocos aciertos, ganancias grandes); A2 abajo a la derecha (muchos aciertos, ganancias pequeñas).](figs/dossier_perfil.png)
 
-![Figura 9. Convergencia del PSO con rf=4%. Mejora el in-sample, pero el resultado no se sostiene fuera de muestra.](figs/v3_fig06_pso_convergencia.png)
+
 
 ---
 
@@ -688,7 +681,7 @@ A2 tiene un perfil mucho más estable: su peor año es −22,4%, frente a −53,
 | Métricas por operación | Por vela | 91% de velas planas en A2 | Win rate 76,9% vs 53,3% |
 | Eliminar Sortino | Mantenerlo | No se usaba y estaba mal definido | Menos métricas, menos confusión |
 | Eliminar ATR | Mantenerlo | Nunca se aplicó en el backtest | E2-A es 0/1 pura |
-| TPE walk-forward | PSO split único | Evalúa en 4 años y exige holdout | A2 estable; PSO sobreajusta |
+| TPE walk-forward | Split único | Evalúa en 4 años y exige holdout | A2 estable |
 | 100 trials | 80/150 | Mismo presupuesto para las 6 | Comparación justa |
 | Warm start | Búsqueda fría | Evita que el TPE pierda un punto conocido | A2 se mantiene |
 | Recomendar A2 | SMA | Menor drawdown y mayor consistencia | Perfil conservador defendible |
@@ -808,7 +801,7 @@ Porque el período completo incluye 2022 (−22,4%) y 2025-2026 (+5,8%). En 2024
 Se eliminó porque no se usaba para decidir y la implementación anterior no era estándar. Si se reporta, debe ser con la fórmula correcta y una nota.
 
 **5. ¿Por qué TPE y no PSO?**
-Porque el protocolo de TPE es walk-forward con holdout. PSO se probó con un solo split 70/30 y sobreajustó: mejoró el in-sample +0,024 y cayó −0,804 fuera de muestra.
+Porque TPE usa folds y holdout. PSO se probó con un solo split y sobreajustó; no forma parte del universo.
 
 **6. ¿Qué es el holdout?**
 El bloque 2025-2026 que no participa de ninguna selección. Es el único test realmente virgen.
@@ -963,7 +956,7 @@ Archivos clave:
 - [ ] Saber qué es el holdout y por qué no es lo mismo que OOS30.
 - [ ] Saber por qué el Sharpe es 0,872 y no 1,144.
 - [ ] Saber por qué A1 y E2-C pierden.
-- [ ] Saber qué es el sobreajuste y cómo se detectó en el PSO.
+- [ ] Saber qué es el sobreajuste y cómo se detecta.
 - [ ] Tener a mano el PDF del capítulo y este dossier.
 
 ---

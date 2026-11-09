@@ -72,7 +72,7 @@ La semilla es 42 y el TPE arranca desde la selección anterior. Ese warm start g
 
 - **Se eliminó el Sortino.** No se usaba para decidir y su definición generaba ambigüedad.
 - **Se eliminó el stop ATR.** El ATR viajaba en los parámetros pero ningún backtest lo aplicaba. E2-A es una señal 0/1 pura de CCI, SMA y volumen.
-- **Se eliminaron las variantes PSO y los overlays TP/SL del universo principal.** El PSO usaba otro protocolo de selección (split único) y los TP/SL son variantes de riesgo del mismo benchmark, no estrategias distintas. Ambos quedan como anexo.
+- **Se excluyeron las variantes PSO y los overlays TP/SL del universo principal.** Los TP/SL son variantes de riesgo del mismo benchmark, no estrategias distintas; el PSO usaba otro protocolo. Ambos quedan como anexo.
 
 ---
 
@@ -209,13 +209,13 @@ Tres resultados importan:
 
 ---
 
-## 6. Re-selección con la métrica oficial y el caso PSO
+## 6. Re-selección con la métrica oficial
 
 ### 6.1 Re-selección TPE con rf = 4%
 
 Para alinear la selección con la métrica oficial, se repitió el TPE de las seis estrategias parametrizables con el objetivo: mediana del Sharpe OOS entre los folds 2021-2024, rf = 4%, warmup global y 100 trials por estrategia.
 
-Tabla 8. Parámetros previos versus selección v3, evaluados bajo el mismo protocolo.
+Tabla 8. Parámetros previos versus selección v3, evaluados bajo el mismo protocolo. Las columnas "previo" y "v3" son dos juegos de parámetros, no dos tipos de pronóstico: ambos se evalúan en los mismos folds (2021-2024) y en el mismo holdout (2025-2026).
 
 | Estrategia | Mediana OOS previa | Mediana OOS v3 | Holdout previo | Holdout v3 | FULL previo | FULL v3 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -233,11 +233,7 @@ Lectura:
 - **EMA, MACD y CCI mejoran el holdout**, aunque MACD y CCI siguen negativos fuera de muestra.
 - **RSI empeora:** mejora la mediana de los folds pero su holdout cae de 0,353 a -0,662. Es el caso típico de sobreajuste a los folds de validación.
 
-### 6.2 El PSO como contraejemplo (anexo)
-
-Se probó una variante PSO con el mismo objetivo (Sharpe con rf = 4%) y un split único 70/30. El resultado fue una mejora in-sample de +0,024 y una caída out-of-sample de -0,804 (Sharpe OOS30 de -0,105). Es evidencia de sobreajuste, no de una mejor estrategia. Por eso el PSO queda fuera del universo normalizado y se conserva solo como anexo metodológico.
-
-La lección es general: **optimizar más fuerte sobre una sola ventana in-sample no mejora el futuro**. La diferencia entre TPE y PSO no es el algoritmo, sino el protocolo: el TPE evalúa en cuatro folds y exige un holdout; el PSO maximizaba un solo IS70.
+> **Nota metodológica:** también se probó una variante PSO con un split único; sobreajustó y no forma parte del universo. La lección es general: optimizar sobre una sola ventana in-sample no garantiza generalizar.
 
 ---
 
@@ -309,7 +305,7 @@ E2-A A2 ejecuta 39 operaciones en nueve años (unas 4,3 por año), gana el 76,92
 
 4. **La re-selección con rf = 4% valida a A2:** el TPE devuelve exactamente los mismos parámetros. La estrategia recomendada no depende de que la tasa haya sido 0% en la etapa de selección.
 
-5. **Re-optimizar no garantiza generalizar:** el PSO con rf = 4% mejoró el in-sample y colapsó fuera de muestra. El RSI re-seleccionado también empeoró su holdout. La selección walk-forward con holdout es más importante que el algoritmo.
+5. **Re-optimizar no garantiza generalizar:** una variante optimizada con un solo split mejoró el in-sample y colapsó fuera de muestra. El RSI re-seleccionado también empeoró su holdout. La selección walk-forward con holdout es más importante que el algoritmo.
 
 6. **Las compuestas no dominan:** E2-A A1 (-23,5%) y E2-C (-15,1%) pierden dinero. Combinar indicadores con buenos parámetros individuales no produce automáticamente un buen sistema.
 
@@ -329,7 +325,6 @@ E2-A A2 ejecuta 39 operaciones en nueve años (unas 4,3 por año), gana el 76,92
 ```
 python scripts/run_tpe_v3.py              # re-seleccion TPE con rf = 4%
 python scripts/run_resultados.py          # tablas y figuras v3 normalizadas
-python scripts/run_pso_v3.py              # anexo: PSO con rf = 4%
 python scripts/md_to_pdf_v3.py            # este documento en PDF
 ```
 
