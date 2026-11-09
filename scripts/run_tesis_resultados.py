@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 
 from src.processing.resample import resample
 from src.backtesting.engine import backtest
+from src.backtesting.metrics import summarize
 from src.strategies.buy_and_hold import signal_buy_and_hold
 from src.strategies.individuals import (
     signal_rsi_long, signal_macd_long, signal_ma_long, signal_cci_long, EXP01_BEST,
@@ -139,44 +140,11 @@ def build_signals(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def summarize_4h(bt: pl.DataFrame) -> dict:
-    rets = bt["strategy_ret"].drop_nulls().to_numpy()
-    eq = bt["equity"].drop_nulls().to_numpy()
-    n = len(eq)
-    years = n / P4H
-    total = float(eq[-1] / eq[0] - 1)
-    cagr = float((1 + total) ** (1 / years) - 1) if years > 0 else 0.0
-    mu, sd = float(np.mean(rets)), float(np.std(rets, ddof=1)) if len(rets) > 1 else (0.0, 0.0)
-    sharpe = float(mu / sd * np.sqrt(P4H)) if sd > 0 else 0.0
-    down = rets[rets < 0]
-    sdd = float(np.std(down, ddof=1)) if len(down) > 1 else 0.0
-    sortino = float(mu / sdd * np.sqrt(P4H)) if sdd > 0 else 0.0
-    peak = np.maximum.accumulate(eq)
-    dd = (eq - peak) / peak
-    mdd = float(np.min(dd))
-    trough = int(np.argmin(dd))
-    peak_i = int(np.argmax(eq[: trough + 1]))
-    calmar = float(cagr / abs(mdd)) if mdd < 0 else 0.0
-    nz = rets[rets != 0]
-    wr = float(np.mean(nz > 0)) if len(nz) else 0.0
-    g, l = nz[nz > 0].sum(), abs(nz[nz < 0].sum())
-    pf = float(g / l) if l > 0 else (float("inf") if g > 0 else 0.0)
-    pos = bt["position"].to_numpy()
-    entries = int(np.sum((np.diff(pos, prepend=0) == 1)))
-    turnover = float(bt["_turnover"].sum())
-    return {
-        "n_bars": n, "years": round(years, 2), "trades": entries,
-        "exposure": round(float(np.mean(pos)), 4),
-        "final_equity": round(float(eq[-1]), 2),
-        "total_return_%": round(total * 100, 2),
-        "CAGR_%": round(cagr * 100, 2),
-        "sharpe": round(sharpe, 3), "sortino": round(sortino, 3),
-        "maxDD_%": round(mdd * 100, 2),
-        "maxDD_bars": int(trough - peak_i),
-        "calmar": round(calmar, 3),
-        "win_rate_%": round(wr * 100, 2),
-        "profit_factor": round(pf, 3) if np.isfinite(pf) else "inf",
-        "turnover": round(turnover, 1),
-    }
+    """Alias historico de la v1: rf=0 explicito para reproducir sus tablas.
+
+    La salida canonica del proyecto es scripts/run_resultados.py (v3, rf=4%).
+    """
+    return summarize(bt, rf_annual=0.0)
 
 
 def run_backtests(df: pl.DataFrame) -> dict[str, dict[str, pl.DataFrame]]:

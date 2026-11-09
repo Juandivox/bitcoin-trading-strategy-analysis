@@ -1,0 +1,18 @@
+# Configuración efectiva del bot (sin secretos). Las credenciales van en .env.
+# spec v2.0 §7: DEMO, spot, BTC/USDT, 4H, long-only.
+strategy_variant: PSO          # PSO (ganadora del capítulo) | A2 (conservadora)
+symbol: BTCUSDT
+bar_interval: 4h
+budget_usdt: 4900.0            # <= saldo libre DEMO verificado (4993.13)
+entry_notional_usdt: 1000.0
+max_positions: 2
+max_drawdown_pct: null         # sin bloqueo automático por drawdown (explícito)
+history_bars: 600              # > warmup (SMA lenta 227 + volumen 60)
+runs_dir: runs
+tolerances:
+  candle_publish_s: 60
+  quote_max_age_s: 30
+  signal_expiry_s: 120
+  health_interval_s: 15
+  equity_interval_s: 60
+  stale_lock_heartbeat_s: 180

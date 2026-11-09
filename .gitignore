@@ -20,3 +20,6 @@ mlartifacts/
 # OS
 .DS_Store
 Thumbs.db
+
+# Scratch
+temp_image*.png

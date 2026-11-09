@@ -104,14 +104,15 @@ E:\bitcoin-trading-research\
 │   │
 │   ├── strategies/                    # ← Señales long-only 0/1 (fiel a notebooks/05-06)
 │   │   ├── individuals.py             # Etapa 1: RSI/MACD/SMA/EMA/CCI aislados (EXP01_BEST)
-│   │   ├── e2a_composite.py           # Etapa 2: CCI+SMA+Vol+ATR (E2A_A1 paper, E2A_A2_BEST TPE150)
+│   │   ├── e2a_composite.py           # Etapa 2: CCI+SMA+Vol (E2A_A1 paper, E2A_A2_BEST TPE150)
 │   │   ├── e2c_winners.py             # Etapa 2: SMA regimen + MACD trigger + RSI filtro
 │   │   └── buy_and_hold.py            # Benchmark: siempre LONG
 │   │
 │   ├── backtesting/                   # ← Motor aislado
 │   │   ├── engine.py                  # backtest(df, lag=1) → position, strategy_ret, equity, bh_equity
 │   │   ├── costs.py                   # apply_costs (fixed_bps vs atr_based)
-│   │   └── metrics.py                 # sharpe/sortino/calmar/cagr/max_drawdown/win_rate/profit_factor/summarize
+│   │   ├── metrics.py                 # FUENTE ÚNICA: sharpe(rf)/cagr/calmar/max_drawdown/trade_stats/summarize
+│   │   └── metrics_legacy.py          # compatibilidad rf=0 para notebooks 04/05/06 (archivados)
 │   │
 │   └── evaluation/
 │       ├── statistics.py              # compare_strategies()
@@ -162,9 +163,9 @@ duckdb: {memory_limit: 4GB, threads: 4}
 
 **`configs/strategies.yaml:1`** — parámetros reproducibles:
 ```yaml
-strategies: {e2a_composite: {A1 paper CCI20/-100/100 SMA20/50 Vol20/0.5 ATR14/2.0}, e2c_winners: {SMA20/150 RSI14/70 MACD12/26/9}, buy_and_hold: {siempre LONG}} + individuals {rsi 27/41/86, macd 30/46/25, sma 7/228, ema 2/190, cci 39/-64/143}
-backtest: {initial_capital:10000, fees: {maker:0.001, taker:0.001}, slippage: {bps:5, model: fixed_bps}, execution: {lag:1}, position: {allow_short:false}}
-metrics: [pnl, equity_curve, cagr, sharpe, sortino, calmar, max_drawdown, win_rate, profit_factor, turnover]
+strategies: {e2a_composite: {A1 paper CCI20/-100/100 SMA20/50 Vol20/0.5}, e2c_winners: {SMA20/150 RSI14/70 MACD12/26/9}, buy_and_hold: {siempre LONG}} + individuals {rsi 27/41/86, macd 30/46/25, sma 7/228, ema 2/190, cci 39/-64/143}
+backtest: {initial_capital:10000, timeframe: "4h", risk_free_annual: 0.04, fees: {maker:0.001, taker:0.001}, slippage: {bps:5, model: fixed_bps}, execution: {lag:1}, position: {allow_short:false}}
+metrics: [pnl, equity_curve, cagr, sharpe, calmar, max_drawdown, win_rate, profit_factor, turnover]
 ```
 
 Cambiar un parámetro aquí → todos los scripts/notebooks lo leen vía `yaml.safe_load(open("configs/..."))`.
@@ -276,7 +277,14 @@ _cost = _turnover * (fee_bps + slippage_bps)/10000  # 10bps + 5bps
 strategy_ret = position * (close/close.shift(1)-1) - _cost
 equity = initial_capital * (1+strategy_ret).cum_prod()
 ```
-Métricas en `src/backtesting/metrics.py:1`: `cagr`, `sharpe/sortino` (P=525600 para 1m crypto 24/7), `max_drawdown`, `calmar`, `win_rate`, `profit_factor`, `turnover`.
+Métricas en `src/backtesting/metrics.py:1`: `sharpe` (con `rf_annual` obligatorio), `cagr`, `calmar`, `max_drawdown`, `trade_stats`, `summarize`.
+
+**Convención vigente (v3, 2026-11):**
+- Todo el análisis es **4H** (`P = 2.190` velas/año); `P` se deduce del espaciado mediano de los timestamps, nunca se escribe a mano.
+- **Sharpe con `rf_annual = 0.04`** (T-Bill 3M). No existe `rf=0` implícito: la API falla si no se pasa.
+- **Win rate y profit factor POR OPERACIÓN** (entrada 0→1 hasta salida 1→0, incluyendo costo de salida).
+- **Sortino eliminado** del proyecto.
+- Generador canónico: `scripts/run_resultados.py` → `docs/tesis_resultados_v3/`. Los `run_tesis_resultados*.py` quedan como históricos (rf=0 explícito).
 
 ---
 
@@ -325,3 +333,24 @@ python -m src.processing.resample --input data/processed/btcusdt_1m.parquet --ti
 
 ---
 *AGENTS v4 — 2026-09-03 — fiel a notebooks/05-06: etapa 1 (RSI/MACD/SMA/EMA/CCI) + etapa 2 (E2-A/E2-C/BH), long-only. Mantener sincronizado con `requirements.txt`, `configs/*.yaml` y `src/`.*
+
+---
+
+## 10. Bot en tiempo real (`bot-demo/`) — añadido 2026-09-24
+
+Ejecutor en vivo de la estrategia ganadora **E2-A PSO** (BTC/USDT 4H, long-only) contra
+**Binance Demo**, según la especificación funcional v2.0. **No usa el venv de investigación**:
+tiene su propio entorno (`bot-demo/.venv`) y su propio `requirements.txt` pinneado
+(`nautilus_trader==2.0.0rc5` — única línea con `BinanceEnvironment.DEMO`).
+
+- Guía para el operador: `bot-demo/OPERACION.md` · Arquitectura: `bot-demo/ARQUITECTURA.md` ·
+  Evidencia de aceptación y desviaciones: `bot-demo/docs/ACEPTACION.md`.
+- **Decisión técnica clave:** Binance Demo rechaza claves HMAC en su WebSocket API privada
+  (`code=-2028`), por lo que NautilusTrader se usa solo para datos/señales y la ejecución va
+  por REST propio (`app/execution/rest_executor.py`). No cambiar a producción ni Testnet.
+- Tests: `bot-demo/.venv/Scripts/python.exe -m pytest bot-demo/tests` (92) y, con el venv de
+  investigación, `python -m pytest bot-demo/tests/test_strategy_equivalence.py` (12; requiere
+  polars y `data/processed/btcusdt_4h.parquet`).
+- La señal del bot es **equivalente exacta** a `src/strategies/e2a_composite.py` sobre las
+  19.800 velas 4H; cualquier cambio en la investigación debe re-verificarse con ese test.
+- No editar `bot-demo/.env` (credenciales demo) ni versionar `bot-demo/runs/`.

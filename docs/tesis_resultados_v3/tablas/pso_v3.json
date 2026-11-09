@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-11-09T02:20:02.740622+00:00",
+  "objective": "sharpe_IS70",
+  "rf_annual": 0.04,
+  "timeframe": "4h",
+  "periods_per_year": 2190,
+  "n_particles": 12,
+  "n_iters": 20,
+  "seed": 42,
+  "space": {
+    "dims": [
+      "cci_period",
+      "cci_entry",
+      "cci_exit",
+      "sma_fast",
+      "sma_slow",
+      "vol_window",
+      "vol_z_thr"
+    ],
+    "lo": [
+      10.0,
+      -150.0,
+      50.0,
+      5.0,
+      100.0,
+      10.0,
+      -0.5
+    ],
+    "hi": [
+      60.0,
+      50.0,
+      250.0,
+      30.0,
+      250.0,
+      60.0,
+      1.5
+    ]
+  },
+  "best_params": {
+    "cci_period": 10,
+    "cci_entry": 16.4058,
+    "cci_exit": 250.0,
+    "sma_fast": 27,
+    "sma_slow": 250,
+    "vol_window": 13,
+    "vol_z_thr": 0.8839
+  },
+  "best_sharpe_IS": 1.5498,
+  "best_metrics_IS": {
+    "sharpe": 1.5498,
+    "trades": 40,
+    "exposure": 0.2999,
+    "maxDD_%": -40.11,
+    "CAGR_%": 80.37
+  },
+  "baseline_A2": {
+    "params": {
+      "cci_period": 58,
+      "cci_entry": -3,
+      "cci_exit": 186,
+      "sma_fast": 18,
+      "sma_slow": 221,
+      "vol_window": 40,
+      "vol_z_thr": 0.5815632644010449
+    },
+    "sharpe_IS_rf": 0.7621
+  },
+  "old_pso_v2": {
+    "params": {
+      "cci_period": 10,
+      "cci_entry": 50.0,
+      "cci_exit": 250.0,
+      "sma_fast": 27,
+      "sma_slow": 227,
+      "vol_window": 60,
+      "vol_z_thr": 0.1431
+    },
+    "sharpe_IS_rf": 1.5261
+  }
+}

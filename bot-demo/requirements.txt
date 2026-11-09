@@ -1,0 +1,9 @@
+# bot-demo — dependencias pinneadas (spec RNF-02)
+# NautilusTrader 2.0.0rc5 es la única línea con BinanceEnvironment.DEMO.
+# Ver docs/ACEPTACION.md (Etapa A) para la evidencia de viabilidad.
+nautilus_trader==2.0.0rc5
+requests>=2.31,<3
+PyYAML>=6.0,<7
+numpy>=1.26
+pytest>=8.0
+pytest-timeout>=2.3

@@ -1,0 +1,791 @@
+{
+  "generated_at": "2026-11-09T03:19:11.164416+00:00",
+  "method": "TPE + median OOS Sharpe (folds 2021-2024), rf=4%, warmup global",
+  "rf_annual": 0.04,
+  "seed": 42,
+  "folds": [
+    {
+      "fold": "2021",
+      "from": "2021-01-01 00:00:00+00:00",
+      "to": "2022-01-01 00:00:00+00:00"
+    },
+    {
+      "fold": "2022",
+      "from": "2022-01-01 00:00:00+00:00",
+      "to": "2023-01-01 00:00:00+00:00"
+    },
+    {
+      "fold": "2023",
+      "from": "2023-01-01 00:00:00+00:00",
+      "to": "2024-01-01 00:00:00+00:00"
+    },
+    {
+      "fold": "2024",
+      "from": "2024-01-01 00:00:00+00:00",
+      "to": "2025-01-01 00:00:00+00:00"
+    }
+  ],
+  "holdout": {
+    "from": "2025-01-01 00:00:00+00:00",
+    "to": "2026-09-02 00:00:00+00:00"
+  },
+  "validity_rule": "exposure>=0.5%, trades>=5, not(PF<1 and ret<=0), maxDD>=-50%; invalido -> -5.0",
+  "results": {
+    "rsi": {
+      "optimization": {
+        "best_params": {
+          "period": 20,
+          "oversold": 45,
+          "overbought": 80
+        },
+        "best_value": 1.0356,
+        "n_trials": 100,
+        "seed_value": 0.5186
+      },
+      "new": {
+        "params": {
+          "period": 20,
+          "oversold": 45,
+          "overbought": 80
+        },
+        "median_oos": 1.0356,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 1.0268,
+            "valid": true,
+            "score": 1.0268,
+            "trades": 47,
+            "maxDD_%": -21.31
+          },
+          {
+            "fold": "2022",
+            "sharpe": 1.0444,
+            "valid": true,
+            "score": 1.0444,
+            "trades": 50,
+            "maxDD_%": -14.44
+          },
+          {
+            "fold": "2023",
+            "sharpe": 1.1412,
+            "valid": true,
+            "score": 1.1412,
+            "trades": 41,
+            "maxDD_%": -6.99
+          },
+          {
+            "fold": "2024",
+            "sharpe": -1.0026,
+            "valid": false,
+            "score": -5.0,
+            "trades": 32,
+            "maxDD_%": -32.19
+          }
+        ],
+        "holdout": {
+          "sharpe": -0.6623,
+          "CAGR_%": -14.89,
+          "maxDD_%": -39.85,
+          "trades": 70
+        },
+        "full": {
+          "sharpe": 0.2085,
+          "CAGR_%": 5.49,
+          "maxDD_%": -57.43,
+          "trades": 361,
+          "win_rate_%": 69.25,
+          "profit_factor": 1.217
+        }
+      },
+      "old": {
+        "params": {
+          "period": 27,
+          "oversold": 41,
+          "overbought": 86
+        },
+        "median_oos": 0.5186,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 0.5514,
+            "valid": true,
+            "score": 0.5514,
+            "trades": 20,
+            "maxDD_%": -39.84
+          },
+          {
+            "fold": "2022",
+            "sharpe": 0.4858,
+            "valid": true,
+            "score": 0.4858,
+            "trades": 20,
+            "maxDD_%": -14.47
+          },
+          {
+            "fold": "2023",
+            "sharpe": 0.7931,
+            "valid": true,
+            "score": 0.7931,
+            "trades": 18,
+            "maxDD_%": -12.91
+          },
+          {
+            "fold": "2024",
+            "sharpe": -0.6637,
+            "valid": false,
+            "score": -5.0,
+            "trades": 14,
+            "maxDD_%": -27.74
+          }
+        ],
+        "holdout": {
+          "sharpe": 0.3529,
+          "CAGR_%": 9.99,
+          "maxDD_%": -23.3,
+          "trades": 35
+        },
+        "full": {
+          "sharpe": 0.3248,
+          "CAGR_%": 9.69,
+          "maxDD_%": -47.95,
+          "trades": 164,
+          "win_rate_%": 72.56,
+          "profit_factor": 1.454
+        }
+      }
+    },
+    "macd": {
+      "optimization": {
+        "best_params": {
+          "fast": 26,
+          "slow": 89,
+          "signal": 20
+        },
+        "best_value": 1.3367,
+        "n_trials": 100,
+        "seed_value": 1.2659
+      },
+      "new": {
+        "params": {
+          "fast": 26,
+          "slow": 89,
+          "signal": 20
+        },
+        "median_oos": 1.3367,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 0.7481,
+            "valid": true,
+            "score": 0.7481,
+            "trades": 35,
+            "maxDD_%": -38.34
+          },
+          {
+            "fold": "2022",
+            "sharpe": -1.0492,
+            "valid": false,
+            "score": -5.0,
+            "trades": 34,
+            "maxDD_%": -46.31
+          },
+          {
+            "fold": "2023",
+            "sharpe": 2.0962,
+            "valid": true,
+            "score": 2.0962,
+            "trades": 30,
+            "maxDD_%": -21.16
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.9252,
+            "valid": true,
+            "score": 1.9252,
+            "trades": 32,
+            "maxDD_%": -15.46
+          }
+        ],
+        "holdout": {
+          "sharpe": -0.0086,
+          "CAGR_%": -0.78,
+          "maxDD_%": -33.38,
+          "trades": 50
+        },
+        "full": {
+          "sharpe": 0.9243,
+          "CAGR_%": 42.72,
+          "maxDD_%": -60.05,
+          "trades": 285,
+          "win_rate_%": 37.19,
+          "profit_factor": 1.726
+        }
+      },
+      "old": {
+        "params": {
+          "fast": 30,
+          "slow": 46,
+          "signal": 25
+        },
+        "median_oos": 1.2659,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 0.8063,
+            "valid": true,
+            "score": 0.8063,
+            "trades": 37,
+            "maxDD_%": -34.48
+          },
+          {
+            "fold": "2022",
+            "sharpe": -0.8967,
+            "valid": false,
+            "score": -5.0,
+            "trades": 36,
+            "maxDD_%": -42.17
+          },
+          {
+            "fold": "2023",
+            "sharpe": 2.5148,
+            "valid": true,
+            "score": 2.5148,
+            "trades": 31,
+            "maxDD_%": -16.9
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.7254,
+            "valid": true,
+            "score": 1.7254,
+            "trades": 35,
+            "maxDD_%": -17.07
+          }
+        ],
+        "holdout": {
+          "sharpe": -0.3931,
+          "CAGR_%": -11.47,
+          "maxDD_%": -43.06,
+          "trades": 61
+        },
+        "full": {
+          "sharpe": 0.8722,
+          "CAGR_%": 39.46,
+          "maxDD_%": -54.17,
+          "trades": 304,
+          "win_rate_%": 36.84,
+          "profit_factor": 1.643
+        }
+      }
+    },
+    "sma": {
+      "optimization": {
+        "best_params": {
+          "fast": 19,
+          "slow": 247,
+          "kind": "sma"
+        },
+        "best_value": 1.7287,
+        "n_trials": 100,
+        "seed_value": 1.5672
+      },
+      "new": {
+        "params": {
+          "fast": 19,
+          "slow": 247,
+          "kind": "sma"
+        },
+        "median_oos": 1.7287,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 1.565,
+            "valid": true,
+            "score": 1.565,
+            "trades": 6,
+            "maxDD_%": -26.56
+          },
+          {
+            "fold": "2022",
+            "sharpe": -2.751,
+            "valid": false,
+            "score": -5.0,
+            "trades": 10,
+            "maxDD_%": -54.29
+          },
+          {
+            "fold": "2023",
+            "sharpe": 2.2528,
+            "valid": true,
+            "score": 2.2528,
+            "trades": 6,
+            "maxDD_%": -19.99
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.8924,
+            "valid": true,
+            "score": 1.8924,
+            "trades": 8,
+            "maxDD_%": -27.85
+          }
+        ],
+        "holdout": {
+          "sharpe": 0.4355,
+          "CAGR_%": 12.43,
+          "maxDD_%": -22.44,
+          "trades": 15
+        },
+        "full": {
+          "sharpe": 1.1229,
+          "CAGR_%": 57.48,
+          "maxDD_%": -70.96,
+          "trades": 66,
+          "win_rate_%": 33.33,
+          "profit_factor": 4.413
+        }
+      },
+      "old": {
+        "params": {
+          "fast": 7,
+          "slow": 228,
+          "kind": "sma"
+        },
+        "median_oos": 1.5672,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 1.5927,
+            "valid": true,
+            "score": 1.5927,
+            "trades": 10,
+            "maxDD_%": -26.81
+          },
+          {
+            "fold": "2022",
+            "sharpe": -1.6931,
+            "valid": false,
+            "score": -5.0,
+            "trades": 14,
+            "maxDD_%": -44.15
+          },
+          {
+            "fold": "2023",
+            "sharpe": 2.5101,
+            "valid": true,
+            "score": 2.5101,
+            "trades": 10,
+            "maxDD_%": -13.47
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.5416,
+            "valid": true,
+            "score": 1.5416,
+            "trades": 13,
+            "maxDD_%": -27.14
+          }
+        ],
+        "holdout": {
+          "sharpe": 0.0528,
+          "CAGR_%": 2.33,
+          "maxDD_%": -32.06,
+          "trades": 26
+        },
+        "full": {
+          "sharpe": 1.158,
+          "CAGR_%": 60.05,
+          "maxDD_%": -73.96,
+          "trades": 110,
+          "win_rate_%": 25.45,
+          "profit_factor": 3.495
+        }
+      }
+    },
+    "ema": {
+      "optimization": {
+        "best_params": {
+          "fast": 77,
+          "slow": 115,
+          "kind": "ema"
+        },
+        "best_value": 1.6064,
+        "n_trials": 100,
+        "seed_value": 1.2599
+      },
+      "new": {
+        "params": {
+          "fast": 77,
+          "slow": 115,
+          "kind": "ema"
+        },
+        "median_oos": 1.6064,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 1.3178,
+            "valid": true,
+            "score": 1.3178,
+            "trades": 6,
+            "maxDD_%": -28.47
+          },
+          {
+            "fold": "2022",
+            "sharpe": -2.6934,
+            "valid": false,
+            "score": -5.0,
+            "trades": 6,
+            "maxDD_%": -52.15
+          },
+          {
+            "fold": "2023",
+            "sharpe": 2.0791,
+            "valid": true,
+            "score": 2.0791,
+            "trades": 7,
+            "maxDD_%": -23.13
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.895,
+            "valid": true,
+            "score": 1.895,
+            "trades": 6,
+            "maxDD_%": -24.74
+          }
+        ],
+        "holdout": {
+          "sharpe": 0.1215,
+          "CAGR_%": 4.04,
+          "maxDD_%": -28.19,
+          "trades": 13
+        },
+        "full": {
+          "sharpe": 1.0651,
+          "CAGR_%": 53.37,
+          "maxDD_%": -66.72,
+          "trades": 57,
+          "win_rate_%": 35.09,
+          "profit_factor": 3.682
+        }
+      },
+      "old": {
+        "params": {
+          "fast": 2,
+          "slow": 190,
+          "kind": "ema"
+        },
+        "median_oos": 1.2599,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 1.1764,
+            "valid": true,
+            "score": 1.1764,
+            "trades": 19,
+            "maxDD_%": -41.97
+          },
+          {
+            "fold": "2022",
+            "sharpe": -0.8612,
+            "valid": false,
+            "score": -5.0,
+            "trades": 15,
+            "maxDD_%": -26.6
+          },
+          {
+            "fold": "2023",
+            "sharpe": 2.2483,
+            "valid": true,
+            "score": 2.2483,
+            "trades": 21,
+            "maxDD_%": -16.75
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.3434,
+            "valid": true,
+            "score": 1.3434,
+            "trades": 28,
+            "maxDD_%": -30.31
+          }
+        ],
+        "holdout": {
+          "sharpe": -0.2937,
+          "CAGR_%": -5.97,
+          "maxDD_%": -32.84,
+          "trades": 45
+        },
+        "full": {
+          "sharpe": 1.065,
+          "CAGR_%": 52.62,
+          "maxDD_%": -71.8,
+          "trades": 204,
+          "win_rate_%": 19.12,
+          "profit_factor": 2.781
+        }
+      }
+    },
+    "cci": {
+      "optimization": {
+        "best_params": {
+          "period": 36,
+          "entry": -75,
+          "exit_": 150
+        },
+        "best_value": 0.988,
+        "n_trials": 100,
+        "seed_value": 0.9349
+      },
+      "new": {
+        "params": {
+          "period": 36,
+          "entry": -75,
+          "exit_": 150
+        },
+        "median_oos": 0.988,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 0.5132,
+            "valid": true,
+            "score": 0.5132,
+            "trades": 14,
+            "maxDD_%": -46.59
+          },
+          {
+            "fold": "2022",
+            "sharpe": 0.2486,
+            "valid": true,
+            "score": 0.2486,
+            "trades": 16,
+            "maxDD_%": -44.52
+          },
+          {
+            "fold": "2023",
+            "sharpe": 1.776,
+            "valid": true,
+            "score": 1.776,
+            "trades": 18,
+            "maxDD_%": -16.76
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.4629,
+            "valid": true,
+            "score": 1.4629,
+            "trades": 16,
+            "maxDD_%": -23.52
+          }
+        ],
+        "holdout": {
+          "sharpe": -0.2676,
+          "CAGR_%": -11.83,
+          "maxDD_%": -47.41,
+          "trades": 20
+        },
+        "full": {
+          "sharpe": 0.2477,
+          "CAGR_%": 2.89,
+          "maxDD_%": -87.04,
+          "trades": 118,
+          "win_rate_%": 75.42,
+          "profit_factor": 1.289
+        }
+      },
+      "old": {
+        "params": {
+          "period": 39,
+          "entry": -64,
+          "exit_": 143
+        },
+        "median_oos": 0.9349,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 0.5444,
+            "valid": true,
+            "score": 0.5444,
+            "trades": 14,
+            "maxDD_%": -46.59
+          },
+          {
+            "fold": "2022",
+            "sharpe": -0.5262,
+            "valid": false,
+            "score": -5.0,
+            "trades": 17,
+            "maxDD_%": -56.62
+          },
+          {
+            "fold": "2023",
+            "sharpe": 1.9289,
+            "valid": true,
+            "score": 1.9289,
+            "trades": 19,
+            "maxDD_%": -16.76
+          },
+          {
+            "fold": "2024",
+            "sharpe": 1.3255,
+            "valid": true,
+            "score": 1.3255,
+            "trades": 17,
+            "maxDD_%": -23.52
+          }
+        ],
+        "holdout": {
+          "sharpe": -0.4526,
+          "CAGR_%": -17.96,
+          "maxDD_%": -52.41,
+          "trades": 21
+        },
+        "full": {
+          "sharpe": 0.1893,
+          "CAGR_%": -0.06,
+          "maxDD_%": -83.87,
+          "trades": 126,
+          "win_rate_%": 73.81,
+          "profit_factor": 1.195
+        }
+      }
+    },
+    "e2a": {
+      "optimization": {
+        "best_params": {
+          "cci_period": 58,
+          "cci_entry": -3,
+          "cci_exit": 186,
+          "sma_fast": 18,
+          "sma_slow": 221,
+          "vol_window": 40,
+          "vol_z_thr": 0.5815632644010449
+        },
+        "best_value": 1.5666,
+        "n_trials": 100,
+        "seed_value": 1.5666
+      },
+      "new": {
+        "params": {
+          "cci_period": 58,
+          "cci_entry": -3,
+          "cci_exit": 186,
+          "sma_fast": 18,
+          "sma_slow": 221,
+          "vol_window": 40,
+          "vol_z_thr": 0.5815632644010449
+        },
+        "median_oos": 1.5666,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 1.6222,
+            "valid": true,
+            "score": 1.6222,
+            "trades": 5,
+            "maxDD_%": -14.34
+          },
+          {
+            "fold": "2022",
+            "sharpe": -1.7943,
+            "valid": false,
+            "score": -5.0,
+            "trades": 3,
+            "maxDD_%": -22.6
+          },
+          {
+            "fold": "2023",
+            "sharpe": 1.511,
+            "valid": true,
+            "score": 1.511,
+            "trades": 6,
+            "maxDD_%": -9.58
+          },
+          {
+            "fold": "2024",
+            "sharpe": 3.1661,
+            "valid": true,
+            "score": 3.1661,
+            "trades": 7,
+            "maxDD_%": -2.42
+          }
+        ],
+        "holdout": {
+          "sharpe": 0.3389,
+          "CAGR_%": 6.67,
+          "maxDD_%": -8.82,
+          "trades": 8
+        },
+        "full": {
+          "sharpe": 0.8722,
+          "CAGR_%": 17.08,
+          "maxDD_%": -27.93,
+          "trades": 39,
+          "win_rate_%": 76.92,
+          "profit_factor": 3.17
+        }
+      },
+      "old": {
+        "params": {
+          "cci_period": 58,
+          "cci_entry": -3,
+          "cci_exit": 186,
+          "sma_fast": 18,
+          "sma_slow": 221,
+          "vol_window": 40,
+          "vol_z_thr": 0.5815632644010449
+        },
+        "median_oos": 1.5666,
+        "folds": [
+          {
+            "fold": "2021",
+            "sharpe": 1.6222,
+            "valid": true,
+            "score": 1.6222,
+            "trades": 5,
+            "maxDD_%": -14.34
+          },
+          {
+            "fold": "2022",
+            "sharpe": -1.7943,
+            "valid": false,
+            "score": -5.0,
+            "trades": 3,
+            "maxDD_%": -22.6
+          },
+          {
+            "fold": "2023",
+            "sharpe": 1.511,
+            "valid": true,
+            "score": 1.511,
+            "trades": 6,
+            "maxDD_%": -9.58
+          },
+          {
+            "fold": "2024",
+            "sharpe": 3.1661,
+            "valid": true,
+            "score": 3.1661,
+            "trades": 7,
+            "maxDD_%": -2.42
+          }
+        ],
+        "holdout": {
+          "sharpe": 0.3389,
+          "CAGR_%": 6.67,
+          "maxDD_%": -8.82,
+          "trades": 8
+        },
+        "full": {
+          "sharpe": 0.8722,
+          "CAGR_%": 17.08,
+          "maxDD_%": -27.93,
+          "trades": 39,
+          "win_rate_%": 76.92,
+          "profit_factor": 3.17
+        }
+      }
+    }
+  }
+}

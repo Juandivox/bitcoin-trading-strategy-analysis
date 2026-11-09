@@ -28,7 +28,15 @@ paths:
   raw_dir: "data/raw"
   processed_dir: "data/processed"
   features_dir: "data/features"
+  # Serie base 1m: solo se usa para reconstruir la temporalidad de analisis.
+  source_1m: "data/processed/btcusdt_1m.parquet"
+  # Serie canonica de TODO el analisis (backtests, metricas, tablas y figuras).
+  analytics_4h: "data/processed/btcusdt_4h.parquet"
   # Estructura en raw: data/raw/spot/monthly/klines/BTCUSDT/1m/  y  data/raw/spot/daily/klines/...
+
+analytics:
+  timeframe: "4h"   # debe coincidir con backtest.timeframe de configs/strategies.yaml
+  # El parquet de features de 1m (2.3 GB) no lo consume ningun script: archivado.
 
 dataset:
   # Columnas maestras objetivo (1m base)

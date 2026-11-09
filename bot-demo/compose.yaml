@@ -1,0 +1,16 @@
+services:
+  bot:
+    build: .
+    image: e2a-demo-bot:2.0.2
+    container_name: e2a-demo-bot
+    restart: unless-stopped
+    stop_grace_period: 90s
+    env_file:
+      - .env
+    volumes:
+      - ./runs:/bot/runs
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "10"

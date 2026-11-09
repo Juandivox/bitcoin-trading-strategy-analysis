@@ -43,10 +43,8 @@ strategies:
       sma_slow: 50
       vol_window: 20
       vol_z_thr: 0.5
-      atr_period: 14   # stop dinamico: entry - k*ATR (ver src/backtesting/stops.py)
-      atr_k: 2.0
-    # A2 TPE 150 (docs/experimento_02_plan.md): {cci_period: 58, cci_entry: -3, cci_exit: 186, sma_fast: 18, sma_slow: 221, vol_window: 40, vol_z_thr: 0.58, atr_period: 28, atr_k: 2.44}
-    signal_rule: "SMA tendencia + CCI momento + Volumen confirmacion + ATR stop"
+    # A2 TPE 150 (docs/experimento_02_plan.md): {cci_period: 58, cci_entry: -3, cci_exit: 186, sma_fast: 18, sma_slow: 221, vol_window: 40, vol_z_thr: 0.58}
+    signal_rule: "SMA tendencia + CCI momento + Volumen confirmacion"
 
   e2c_winners:
     enabled: true
@@ -60,8 +58,57 @@ strategies:
       macd_sig: 9
     signal_rule: "SMA regimen + MACD trigger + RSI filtro (top ganadoras etapa 1)"
 
+  # E2-A PSO congelado: parametros ganadores del PSO de la v2 (semilla 42),
+  # guardados en docs/tesis_resultados_v2/tablas/pso_best.json. Se congelan para
+  # que la v3 sea reproducible y no re-optimice en cada corrida. OJO: el PSO se
+  # optimizo con rf=0; la v3 solo cambia el REPORTE (rf=4%), no los parametros.
+  e2a_pso_frozen:
+    enabled: true
+    params:
+      cci_period: 10
+      cci_entry: 50.0
+      cci_exit: 250.0
+      sma_fast: 27
+      sma_slow: 227
+      vol_window: 60
+      vol_z_thr: 0.1431
+    signal_rule: "E2-A con parametros PSO v2 (objetivo rf=0, historico)"
+
+  # PSO re-optimizado con el objetivo correcto (Sharpe IS70 con rf=4%).
+  # Resultado: mejora marginal en IS70 (1.546 vs 1.523) pero colapsa OOS30
+  # (-0.174) y C24 (-0.204). Se conserva como evidencia de sobreajuste; NO se
+  # usa en el bot. Ver docs/tesis_resultados_v3/tablas/pso_v3.json.
+  e2a_pso_rf4:
+    enabled: true
+    params:
+      cci_period: 10
+      cci_entry: 16.4058
+      cci_exit: 250.0
+      sma_fast: 27
+      sma_slow: 250
+      vol_window: 13
+      vol_z_thr: 0.8839
+    signal_rule: "E2-A re-optimizado con rf=4% (sobreajuste documentado)"
+
+# ---------------------------------------------------------------------------
+# Seleccion canonica v3 (TPE, 100 trials, mediana Sharpe OOS con rf=4%,
+# folds 2021-2024, warmup global). Es la unica fuente de parametros de la v3.
+# Resultado: E2-A vuelve a A2 (el TPE no mejora la seleccion anterior).
+# ---------------------------------------------------------------------------
+v3_selection:
+  protocol: "TPE 100 trials | mediana Sharpe OOS folds 2021-2024 | rf=4% | warmup global | 5 trades/fold"
+  params:
+    rsi:  {period: 20, oversold: 45, overbought: 80}
+    macd: {fast: 26, slow: 89, signal: 20}
+    sma:  {fast: 19, slow: 247}
+    ema:  {fast: 77, slow: 115}
+    cci:  {period: 36, entry: -75, exit_: 150}
+    e2a:  {cci_period: 58, cci_entry: -3, cci_exit: 186, sma_fast: 18, sma_slow: 221, vol_window: 40, vol_z_thr: 0.5815632644010449}
+
 backtest:
   initial_capital: 10000.0
+  timeframe: "4h"              # temporalidad canonica de TODO el analisis
+  risk_free_annual: 0.04       # T-Bill 3M EE.UU.; ver docs/ANEXO_METODOLOGICO.md
   fees:
     maker: 0.001   # 0.10% spot Binance sin BNB
     taker: 0.001
@@ -82,7 +129,6 @@ metrics:
   - equity_curve
   - cagr
   - sharpe
-  - sortino
   - calmar
   - max_drawdown
   - max_drawdown_duration
@@ -95,6 +141,6 @@ metrics:
 
 optimization:
   method: "optuna"  # optuna | grid | genetic | pso (TPE mediana OOS Sharpe; NSGA-II Pareto)
-  objective: "sharpe"  # sharpe | sortino | calmar | profit_factor
+  objective: "sharpe"  # sharpe | calmar | profit_factor
   n_trials: 80
   cv: "walk_forward"

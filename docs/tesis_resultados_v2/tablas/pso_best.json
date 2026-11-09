@@ -1,0 +1,54 @@
+{
+  "best_params": {
+    "cci_period": 10,
+    "cci_entry": 50.0,
+    "cci_exit": 250.0,
+    "sma_fast": 27,
+    "sma_slow": 227,
+    "vol_window": 60,
+    "vol_z_thr": 0.1431,
+    "atr_period": 14,
+    "atr_k": 2.0
+  },
+  "best_sharpe_IS": 1.616,
+  "baseline_A2_sharpe_IS": 1.006,
+  "n_particles": 12,
+  "n_iters": 20,
+  "seed": 42,
+  "objective": "sharpe_IS70",
+  "space": [
+    {
+      "dims": [
+        "cci_period",
+        "cci_entry",
+        "cci_exit",
+        "sma_fast",
+        "sma_slow",
+        "vol_window",
+        "vol_z_thr"
+      ]
+    },
+    {
+      "lo": [
+        10.0,
+        -150.0,
+        50.0,
+        5.0,
+        100.0,
+        10.0,
+        -0.5
+      ]
+    },
+    {
+      "hi": [
+        60.0,
+        50.0,
+        250.0,
+        30.0,
+        250.0,
+        60.0,
+        1.5
+      ]
+    }
+  ]
+}

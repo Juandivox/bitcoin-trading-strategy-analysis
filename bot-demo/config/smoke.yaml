@@ -1,0 +1,17 @@
+# Configuración de humo (solo para pruebas de aceptación rápidas).
+strategy_variant: PSO
+symbol: BTCUSDT
+bar_interval: 4h
+budget_usdt: 4900.0
+entry_notional_usdt: 1000.0
+max_positions: 2
+history_bars: 600
+runs_dir: runs
+tolerances:
+  candle_publish_s: 60
+  quote_max_age_s: 30
+  signal_expiry_s: 120
+  health_interval_s: 5
+  equity_interval_s: 15
+  heartbeat_log_s: 20
+  stale_lock_heartbeat_s: 180

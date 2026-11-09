@@ -1,0 +1,8 @@
+runs/
+runs-docker/
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/

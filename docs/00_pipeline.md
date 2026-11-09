@@ -255,8 +255,12 @@ Calcula:
 
 ```
 PnL, fees, slippage, turnover, equity curve, drawdown,
-Sharpe, Sortino, Calmar, CAGR, win_rate, profit_factor
+Sharpe (con rf), Calmar, CAGR, win_rate y profit factor por operación
 ```
+
+> Convención vigente: análisis en **4H** (P = 2.190), `rf_annual = 0.04`,
+> sin Sortino. Ver `docs/03_backtesting_y_validacion.md` y
+> `docs/ANEXO_METODOLOGICO.md`.
 
 **Costos (críticos):**
 
@@ -266,8 +270,8 @@ Sharpe, Sortino, Calmar, CAGR, win_rate, profit_factor
 **Ejecución sin look-ahead:**
 
 ```python
-position_t = signal_{t-lag}   # lag=1 => ejecuta en siguiente vela
-ret_t = position_{t-1} * (price_t/price_{t-1} -1) - turnover*cost
+position_t = signal_{t-lag}   # lag=1 => ejecuta en la vela siguiente
+ret_t = position_t * (price_t/price_{t-1} - 1) - |position_t - position_{t-1}| * cost
 ```
 
 ---
@@ -279,7 +283,8 @@ Etapa 1 — indicadores aislados, long-only (`src/strategies/individuals.py`, be
 
 Etapa 2 — 3 sistemas completos (`notebooks/04_results.ipynb` los compara):
 ```
-E2-A: CCI + SMA + Volumen -> LONG(1)/FLAT(0) + ATR stop dinamico -> BT   (src/strategies/e2a_composite.py)
+E2-A: CCI + SMA + Volumen -> LONG(1)/FLAT(0) -> BT                        (src/strategies/e2a_composite.py)
+      NOTA: el stop ATR se elimino del proyecto (nunca se aplico en el backtest).
 E2-C: SMA regimen + MACD trigger + RSI filtro -> LONG/FLAT -> BT          (src/strategies/e2c_winners.py)
 BH:   siempre LONG (hold BTC con el capital, benchmark)                   (src/strategies/buy_and_hold.py)
 ```

@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-11-09T03:52:31.177986+00:00",
+  "git_commit": "dbcd7cb",
+  "git_dirty": true,
+  "config_sha256": "7fa9500cd69a0d97",
+  "timeframe": "4h",
+  "periods_per_year": 2190,
+  "rf_annual": 0.04,
+  "fee_bps": 10.0,
+  "slippage_bps": 5.0,
+  "lag": 1,
+  "initial_capital": 10000.0,
+  "dataset": "data\\processed\\btcusdt_4h.parquet",
+  "n_bars": 19800,
+  "fecha_inicio": "2017-08-17 04:00:00+00:00",
+  "fecha_fin": "2026-09-01 20:00:00+00:00",
+  "universo": [
+    "BH",
+    "RSI",
+    "MACD",
+    "SMA",
+    "EMA",
+    "CCI",
+    "E2A_A1",
+    "E2A_A2",
+    "E2C"
+  ],
+  "selection_protocol": "TPE 100 trials | mediana Sharpe OOS folds 2021-2024 | rf=4% | warmup global | 5 trades/fold",
+  "selected_params": {
+    "rsi": {
+      "period": 20,
+      "oversold": 45,
+      "overbought": 80
+    },
+    "macd": {
+      "fast": 26,
+      "slow": 89,
+      "signal": 20
+    },
+    "sma": {
+      "fast": 19,
+      "slow": 247
+    },
+    "ema": {
+      "fast": 77,
+      "slow": 115
+    },
+    "cci": {
+      "period": 36,
+      "entry": -75,
+      "exit_": 150
+    },
+    "e2a": {
+      "cci_period": 58,
+      "cci_entry": -3,
+      "cci_exit": 186,
+      "sma_fast": 18,
+      "sma_slow": 221,
+      "vol_window": 40,
+      "vol_z_thr": 0.5815632644010449
+    }
+  }
+}
