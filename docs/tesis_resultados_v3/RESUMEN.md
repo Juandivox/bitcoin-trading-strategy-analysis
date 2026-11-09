@@ -4,7 +4,7 @@
 - Timeframe: **4h** (P = 2,190 velas/anio)
 - Tasa libre de riesgo: **4.00% anual** (0.000018 por vela)
 - Costos: 10 bps fee + 5 bps slippage | lag = 1
-- Commit: `dbcd7cb` (arbol de trabajo sucio) | config hash: `7fa9500cd69a0d97`
+- Commit: `5881279` | config hash: `7fa9500cd69a0d97`
 - Universo: BH, RSI, MACD, SMA, EMA, CCI, E2A_A1, E2A_A2, E2C
 - Seleccion: TPE 100 trials | mediana Sharpe OOS folds 2021-2024 | rf=4% | warmup global | 5 trades/fold
 
