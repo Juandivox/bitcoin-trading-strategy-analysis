@@ -284,13 +284,7 @@ A2 mantiene la arquitectura y cambia los parámetros: CCI 58/−3/186, SMA 18/22
 
 ## 3.3 E2-B: el experimento de machine learning
 
-E2-B probó XGBoost, Random Forest y LightGBM para predecir la probabilidad de subida. Se descartó porque:
-
-- El accuracy era bajo (alrededor de 0,40).
-- El trading con umbral de probabilidad no superaba a las reglas simples.
-- Añadía complejidad y riesgo de sobreajuste sin mejorar el Sharpe.
-
-No forma parte del universo final. Se menciona para explicar por qué existe la letra C: se evaluaron tres familias (A, B y C).
+E2-B fue un experimento con XGBoost, Random Forest y LightGBM que se descartó: no superaba a las reglas simples y añadía complejidad. No forma parte del universo actual; se menciona solo para explicar por qué la tercera familia se llama E2-C.
 
 ## 3.4 E2-C: la composición de ganadoras
 
@@ -309,15 +303,9 @@ Parámetros fijos: SMA 20/150, RSI 14/70, MACD 12/26/9.
 
 **Por qué pierde:** 294 operaciones × 30 pb ida y vuelta ≈ 88% del capital pagado en costos. Además, el MACD genera muchas señales falsas, el RSI la saca temprano de las tendencias y el régimen la deja fuera de buenos tramos. Es un control negativo: combinar las ganadoras individuales no garantiza una buena compuesta.
 
-## 3.5 Las tres versiones del trabajo
+## 3.5 Versión vigente
 
-| Versión | Métrica | Optimizador | Universo | Qué aportó |
-|---|---|---|---|---|
-| v1 | rf=0, Sortino, por vela | TPE | 10 estrategias | Primer capítulo de resultados |
-| v2 | rf=0, Sortino, por vela | PSO sobre IS70 | 13 estrategias | Variante PSO y split 70/30 |
-| **v3** | **rf=4%, por operación** | **TPE walk-forward** | **9 estrategias** | **Normalización y recomendación** |
-
-La v3 no es una versión más "bonita": es la que elimina las inconsistencias de las anteriores (rf=0, Sortino mal definido, ATR que no se aplicaba, protocolos de selección distintos).
+Este documento describe la **v3 normalizada**, la versión que se usa en la tesis.
 
 ---
 
@@ -505,7 +493,7 @@ v <- w*v + c1*r1*(pbest - x) + c2*r2*(gbest - x)
 x <- x + v
 ```
 
-**Por qué se usó en la v2:** era simple de implementar en numpy y estaba citado en la literatura de trading. Pero la v2 cambió dos cosas a la vez: el algoritmo (TPE → PSO) y el protocolo (folds + holdout → un solo split 70/30). Eso hizo imposible saber cuál de las dos explicaba el resultado.
+**Por qué se probó:** era simple de implementar en numpy y estaba citado en la literatura de trading. Pero cambia dos cosas a la vez: el algoritmo (TPE → PSO) y el protocolo (folds + holdout → un solo split 70/30). Eso hace imposible saber cuál de las dos explica el resultado.
 
 ## 7.4 Folds y holdout: estudiar, simular y examinar
 
@@ -536,20 +524,9 @@ Los folds son OOS respecto de su ventana de entrenamiento, pero se usan para ele
 
 Un solo año excepcional no debe dominar la selección. La mediana exige que el candidato sea razonable en la mayoría de los años, no solo en el mejor.
 
-## 7.7 El 2,045 de la v2
+## 7.7 Resultado de la re-selección
 
-El capítulo anterior citaba "mediana del Sharpe OOS entre folds = 2,045" para A2. Ese número no es comparable con el Sharpe del período completo:
-
-- Se calculó con rf=0.
-- Recalculaba los indicadores dentro de cada fold, sin warmup global.
-- El fold 2022 tenía solo 3 operaciones y la regla de validez lo marcaba inválido con −5,0.
-- La mediana de [1,79, −5,0, 2,31, 3,10] da 2,047, que redondeado es 2,045.
-
-Con el protocolo actual (rf=4%, warmup global), la mediana de A2 es **1,567** y su Sharpe FULL es **0,872**.
-
-## 7.8 Resultado de la re-selección
-
-| Estrategia | Mediana OOS vieja | Mediana OOS nueva | Holdout viejo | Holdout nuevo |
+| Estrategia | Mediana OOS previa | Mediana OOS v3 | Holdout previo | Holdout v3 |
 |---|---:|---:|---:|---:|
 | RSI | 0,519 | 1,036 | 0,353 | −0,662 |
 | MACD | 1,266 | 1,337 | −0,393 | −0,009 |
@@ -562,15 +539,16 @@ Con el protocolo actual (rf=4%, warmup global), la mediana de A2 es **1,567** y 
 - **SMA mejoró en las tres dimensiones.**
 - **RSI empeoró:** mejoró los folds pero su holdout cayó a −0,662.
 
-## 7.9 El PSO con rf=4% como contraejemplo
+## 7.8 El PSO con rf=4% como contraejemplo
+
+Se probó una variante PSO con el mismo objetivo (Sharpe con rf=4%) y un solo split 70/30. El resultado fue sobreajuste: buen desempeño in-sample y caída fuerte fuera de muestra.
 
 | | IS70 | OOS30 | FULL | MaxDD |
 |---|---:|---:|---:|---:|
-| PSO v2 (rf=0) | 1,526 | 0,699 | 1,326 | −50,34 % |
-| PSO v3 (rf=4%) | 1,550 | **−0,105** | 1,182 | −40,11 % |
+| PSO (rf=4%) | 1,550 | **−0,105** | 1,182 | −40,11 % |
 | E2-A A2 | 1,567 | **1,412** | 0,872 | −27,93 % |
 
-La re-optimización mejoró el in-sample en +0,024 y destruyó el forward en −0,804. Es evidencia de sobreajuste. Por eso el PSO queda fuera del universo normalizado.
+El PSO mejora apenas el in-sample y pierde dinero fuera de muestra. Por eso queda fuera del universo y se conserva solo como anexo metodológico.
 
 ---
 
@@ -697,9 +675,7 @@ A2 tiene un perfil mucho más estable: su peor año es −22,4%, frente a −53,
 
 ![Figura 8. Dos perfiles: win rate vs payoff. SMA está arriba a la izquierda (pocos aciertos, ganancias grandes); A2 abajo a la derecha (muchos aciertos, ganancias pequeñas).](figs/dossier_perfil.png)
 
-![Figura 9. Sharpe antes y después de la normalización. La caída se explica casi toda por la tasa libre de riesgo, no por un deterioro de las estrategias.](figs/dossier_sharpe_antes_despues.png)
-
-![Figura 10. Convergencia del PSO con rf=4%. Mejora el in-sample, pero el resultado no se sostiene fuera de muestra.](figs/v3_fig06_pso_convergencia.png)
+![Figura 9. Convergencia del PSO con rf=4%. Mejora el in-sample, pero el resultado no se sostiene fuera de muestra.](figs/v3_fig06_pso_convergencia.png)
 
 ---
 
@@ -718,28 +694,6 @@ A2 tiene un perfil mucho más estable: su peor año es −22,4%, frente a −53,
 | Recomendar A2 | SMA | Menor drawdown y mayor consistencia | Perfil conservador defendible |
 | PSO a anexo | Universo principal | Protocolo distinto y OOS negativo | Menos confusión |
 | Bot en PSO | A2 | Cambio pendiente | Inconsistencia declarada |
-
-## 9.1 Antes y después del Sharpe
-
-| Estrategia | Antes (rf=0) | Después (rf=4%) | Δ total | Por rf | Por params |
-|---|---:|---:|---:|---:|---:|
-| SMA | 1,244 | 1,123 | −0,121 | −0,086 | −0,035 |
-| EMA | 1,152 | 1,065 | −0,087 | −0,087 | 0,000 |
-| MACD | 0,960 | 0,924 | −0,036 | −0,088 | +0,052 |
-| E2-A A2 | 1,144 | 0,872 | −0,271 | −0,271 | 0,000 |
-| BH | 0,808 | 0,749 | −0,059 | −0,059 | 0,000 |
-| CCI | 0,264 | 0,248 | −0,017 | −0,075 | +0,058 |
-| RSI | 0,432 | 0,209 | −0,224 | −0,108 | −0,116 |
-| E2-C | −0,024 | −0,262 | −0,239 | −0,239 | 0,000 |
-| E2-A A1 | −0,609 | −1,463 | −0,854 | −0,854 | 0,000 |
-
-La caída por rf es exactamente `rf / volatilidad anual`:
-
-- A1: 0,04 / 0,0468 = 0,854.
-- A2: 0,04 / 0,1474 = 0,271.
-- BH: 0,04 / 0,6817 = 0,059.
-
-Por eso las estrategias de baja volatilidad pierden más Sharpe al introducir la tasa.
 
 ---
 
@@ -854,7 +808,7 @@ Porque el período completo incluye 2022 (−22,4%) y 2025-2026 (+5,8%). En 2024
 Se eliminó porque no se usaba para decidir y la implementación anterior no era estándar. Si se reporta, debe ser con la fórmula correcta y una nota.
 
 **5. ¿Por qué TPE y no PSO?**
-Porque el protocolo de TPE es walk-forward con holdout. PSO se usó en la v2 con un solo split 70/30 y sobreajustó: mejoró el in-sample +0,024 y cayó −0,804 fuera de muestra.
+Porque el protocolo de TPE es walk-forward con holdout. PSO se probó con un solo split 70/30 y sobreajustó: mejoró el in-sample +0,024 y cayó −0,804 fuera de muestra.
 
 **6. ¿Qué es el holdout?**
 El bloque 2025-2026 que no participa de ninguna selección. Es el único test realmente virgen.
@@ -895,16 +849,13 @@ Porque el cambio de variante es una decisión operativa pendiente. La tesis reco
 **18. ¿Qué pasa si cambio la rf a 5%?**
 A2 baja a 0,804 y SMA a 1,101; el ranking no cambia. La conclusión es robusta entre 0% y 5%.
 
-**19. ¿Por qué el Sharpe de la v2 era 1,144 y ahora 0,872?**
-Porque la v2 usaba rf=0. La diferencia de 0,271 es exactamente `4% / 14,74%`. No cambió la estrategia; cambió la métrica.
+**19. ¿Por qué el Sharpe es 0,872 y no 1,144?**
+Porque el Sharpe oficial usa rf=4%. Con rf=0 sería 1,144; la diferencia de 0,271 es exactamente `4% / 14,74%`. No cambia la estrategia; cambia la tasa.
 
 **20. ¿Qué haría con más tiempo?**
 Ampliar el espacio del TPE (los bordes), probar walk-forward con ventanas móviles, incluir costos por volumen, modelar stops intra-vela y evaluar una cartera A2+SMA.
 
-**21. ¿Por qué el 2,045 de la v2 no aparece ahora?**
-Porque era la mediana de folds con rf=0, warmup por fold y un fold inválido con −5,0. Con el protocolo actual, la mediana de A2 es 1,567.
-
-**22. ¿Cómo se reproduce?**
+**21. ¿Cómo se reproduce?**
 Con `run_tpe_v3.py`, `run_resultados.py` y `md_to_pdf_v3.py`. El `manifest.json` guarda commit, hash de configuración, rf, timeframe y universo.
 
 ---
@@ -914,7 +865,6 @@ Con `run_tpe_v3.py`, `run_resultados.py` y `md_to_pdf_v3.py`. El `manifest.json`
 ## 12.1 Limitaciones
 
 - **Pocas operaciones en A2:** 39 en nueve años. La inferencia sobre win rate y PF es limitada.
-- **Holdout usado para comparar selecciones:** el 2025-2026 se usó para comparar los parámetros viejos y nuevos; ya no es completamente virgen para esa comparación.
 - **Bordes del TPE:** CCI salida en 150 y SMA lenta en 247 quedaron en los límites del espacio.
 - **Sin stops intra-vela:** todo se evalúa a cierre de vela de 4H.
 - **Un solo activo:** BTC/USDT; no se prueba diversificación.
@@ -1011,7 +961,7 @@ Archivos clave:
 - [ ] Saber la diferencia entre Sharpe, Sortino y Calmar.
 - [ ] Saber por qué A2 se recomienda aunque SMA tenga mejor Sharpe.
 - [ ] Saber qué es el holdout y por qué no es lo mismo que OOS30.
-- [ ] Saber por qué el 2,045 de la v2 no es comparable con el 0,872 actual.
+- [ ] Saber por qué el Sharpe es 0,872 y no 1,144.
 - [ ] Saber por qué A1 y E2-C pierden.
 - [ ] Saber qué es el sobreajuste y cómo se detectó en el PSO.
 - [ ] Tener a mano el PDF del capítulo y este dossier.

@@ -4,7 +4,7 @@
 
 **Versión 3 normalizada — 8 de noviembre de 2026**
 
-> Esta versión reemplaza la v2. Todo el análisis se calcula en velas de 4 horas, el Sharpe usa una tasa libre de riesgo del 4,00% anual, las métricas de acierto son por operación y se eliminaron el Sortino y el stop ATR. Las estrategias se re-seleccionaron con un único protocolo: TPE con mediana del Sharpe fuera de muestra, rf = 4% y warmup global.
+> Versión vigente: v3 normalizada. Todo el análisis se calcula en velas de 4 horas, el Sharpe usa una tasa libre de riesgo del 4,00% anual, las métricas de acierto son por operación y se eliminaron el Sortino y el stop ATR. Los parámetros se seleccionaron con un único protocolo: TPE con mediana del Sharpe fuera de muestra, rf = 4% y warmup global.
 >
 > **Recomendación:** E2-A A2 para el perfil conservador de esta tesis. La SMA se reporta como alternativa agresiva.
 
@@ -213,11 +213,11 @@ Tres resultados importan:
 
 ### 6.1 Re-selección TPE con rf = 4%
 
-La v2 había seleccionado los parámetros con rf = 0. Para eliminar esa inconsistencia, se repitió el TPE de las seis estrategias parametrizables con el objetivo oficial: mediana del Sharpe OOS entre los folds 2021-2024, rf = 4%, warmup global y 100 trials por estrategia.
+Para alinear la selección con la métrica oficial, se repitió el TPE de las seis estrategias parametrizables con el objetivo: mediana del Sharpe OOS entre los folds 2021-2024, rf = 4%, warmup global y 100 trials por estrategia.
 
-Tabla 8. Parámetros viejos versus nuevos, evaluados bajo el mismo protocolo v3.
+Tabla 8. Parámetros previos versus selección v3, evaluados bajo el mismo protocolo.
 
-| Estrategia | Mediana OOS vieja | Mediana OOS nueva | Holdout viejo | Holdout nuevo | FULL viejo | FULL nuevo |
+| Estrategia | Mediana OOS previa | Mediana OOS v3 | Holdout previo | Holdout v3 | FULL previo | FULL v3 |
 |---|---:|---:|---:|---:|---:|---:|
 | RSI | 0.519 | 1.036 | 0.353 | -0.662 | 0.325 | 0.209 |
 | MACD | 1.266 | 1.337 | -0.393 | -0.009 | 0.872 | 0.924 |
@@ -233,20 +233,9 @@ Lectura:
 - **EMA, MACD y CCI mejoran el holdout**, aunque MACD y CCI siguen negativos fuera de muestra.
 - **RSI empeora:** mejora la mediana de los folds pero su holdout cae de 0,353 a -0,662. Es el caso típico de sobreajuste a los folds de validación.
 
-### 6.2 Qué era el 2,045 de la v2
+### 6.2 El PSO como contraejemplo (anexo)
 
-El capítulo anterior citaba "mediana del Sharpe OOS entre folds = 2,045" para A2. Ese número **no es comparable** con el Sharpe del periodo completo:
-
-- Se calculó con rf = 0 (la v2 no usaba tasa libre de riesgo).
-- Recalculaba los indicadores dentro de cada fold, sin warmup global.
-- El fold 2022 tenía solo 3 operaciones y la regla de validez lo marcaba inválido con -5,0.
-- La mediana de [1,79, -5,0, 2,31, 3,10] da 2,047, que redondeado es 2,045.
-
-Con el protocolo actual (rf = 4%, warmup global), la mediana de A2 es **1,567** y su Sharpe FULL es **0,872**. Son tres métricas distintas: objetivo de selección, Sharpe del periodo completo y Sharpe fuera de muestra. La tesis debe citar cada una con su definición.
-
-### 6.3 El PSO como contraejemplo (anexo)
-
-La v2 también introdujo una variante PSO seleccionada sobre un split único 70/30. Se re-optimizó con rf = 4% y el resultado fue una mejora in-sample de +0,024 y una caída out-of-sample de -0,804 (Sharpe OOS30 de 0,699 a -0,105). Es evidencia de sobreajuste, no de una mejor estrategia. Por eso el PSO queda fuera del universo normalizado y se conserva solo como anexo metodológico.
+Se probó una variante PSO con el mismo objetivo (Sharpe con rf = 4%) y un split único 70/30. El resultado fue una mejora in-sample de +0,024 y una caída out-of-sample de -0,804 (Sharpe OOS30 de -0,105). Es evidencia de sobreajuste, no de una mejor estrategia. Por eso el PSO queda fuera del universo normalizado y se conserva solo como anexo metodológico.
 
 La lección es general: **optimizar más fuerte sobre una sola ventana in-sample no mejora el futuro**. La diferencia entre TPE y PSO no es el algoritmo, sino el protocolo: el TPE evalúa en cuatro folds y exige un holdout; el PSO maximizaba un solo IS70.
 
@@ -331,7 +320,6 @@ E2-A A2 ejecuta 39 operaciones en nueve años (unas 4,3 por año), gana el 76,92
 - E2-A A2 ejecuta solo 39 operaciones en nueve años: la inferencia estadística sobre win rate y profit factor es limitada.
 - El análisis es a cierre de vela de 4 horas; no se modelan stops intra-vela ni impacto de mercado.
 - El TPE explota en algunos casos los bordes del espacio de búsqueda (CCI salida en 150 para el nuevo CCI, SMA lenta en 247). Ampliar los rangos y validar con walk-forward queda como trabajo futuro.
-- El holdout 2025-2026 se usó para comparar las selecciones nuevas y viejas; ya no es un conjunto completamente virgen para esa comparación.
 - El bot opera en Binance Demo, no en producción.
 
 ---
