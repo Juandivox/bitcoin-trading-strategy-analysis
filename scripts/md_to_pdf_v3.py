@@ -23,7 +23,7 @@ _spec.loader.exec_module(_base)
 # Sobrescribe las rutas del motor base (las funciones leen estos globales).
 _base.SRC = ROOT / "docs" / "tesis_resultados_v3" / "CAPITULO_RESULTADOS_v3.md"
 _base.FIGDIR = ROOT / "docs" / "tesis_resultados_v3"
-_base.OUT = Path(r"C:\Users\jugev\Desktop") / "CAPITULO_RESULTADOS_V3_BTC_Trading.pdf"
+_base.OUT = Path(r"C:\Users\jugev\Desktop\Tesis_BTC_USDT_4H") / "CAPITULO_RESULTADOS_V3_BTC_Trading.pdf"
 
 
 def main() -> None:

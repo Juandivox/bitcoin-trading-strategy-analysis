@@ -22,7 +22,7 @@ _spec.loader.exec_module(_base)
 
 _base.SRC = ROOT / "docs" / "GUIA_CODIGO.md"
 _base.FIGDIR = ROOT / "docs"
-_base.OUT = Path(r"C:\Users\jugev\Desktop") / "GUIA_CODIGO_BTC_Trading.pdf"
+_base.OUT = Path(r"C:\Users\jugev\Desktop\Tesis_BTC_USDT_4H") / "GUIA_CODIGO_BTC_Trading.pdf"
 
 
 def main() -> None:

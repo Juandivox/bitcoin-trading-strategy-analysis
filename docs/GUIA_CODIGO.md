@@ -219,7 +219,7 @@ python scripts/run_resultados.py
         -> 11 CSV + 6 figuras + RESUMEN.md + manifest.json
 
 python scripts/md_to_pdf_v3.py
-        -> C:\Users\jugev\Desktop\CAPITULO_RESULTADOS_V3_BTC_Trading.pdf
+        -> C:\Users\jugev\Desktop\Tesis_BTC_USDT_4H\CAPITULO_RESULTADOS_V3_BTC_Trading.pdf
 ```
 
 El `manifest.json` guarda el commit de git, el hash de la configuración, el timeframe, el número de velas, la rf, los costos, el lag y el protocolo de selección. Es la trazabilidad de la corrida.
