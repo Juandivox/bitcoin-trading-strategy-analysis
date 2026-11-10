@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "ventana": "2026-08-09 -> ultimo dato",
+    "desde": "2026-08-09 00:00:00+00:00",
+    "hasta": "2026-11-10 00:00:00+00:00",
+    "n_velas_4h": 558,
+    "rf_annual": 0.04,
+    "costos": "10 bps fee + 5 bps slippage",
+    "fuente": "Binance Data Vision (klines 1m diarios, resampleados a 4H)"
+  },
+  "resultados": [
+    {
+      "estrategia": "SMA",
+      "retorno_%": 12.513849494465568,
+      "maxDD_%": -8.927160890088338,
+      "sharpe_anual_ref": 1.6178527618323149,
+      "entradas": 2,
+      "salidas": 3,
+      "exposicion_%": 70.43010752688173,
+      "eq_inicio": 550013.069618807,
+      "eq_fin": 618840.8773507947,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "EMA",
+      "retorno_%": 15.856242064595305,
+      "maxDD_%": -7.474649078268869,
+      "sharpe_anual_ref": 2.0399493705899427,
+      "entradas": 1,
+      "salidas": 2,
+      "exposicion_%": 68.27956989247312,
+      "eq_inicio": 434577.74784790265,
+      "eq_fin": 503485.4475055327,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "MACD",
+      "retorno_%": 7.795438964013135,
+      "maxDD_%": -17.38180364401385,
+      "sharpe_anual_ref": 1.0174645578597952,
+      "entradas": 9,
+      "salidas": 10,
+      "exposicion_%": 31.36200716845878,
+      "eq_inicio": 206640.79198340708,
+      "eq_fin": 222749.3487972269,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "E2A_A2",
+      "retorno_%": -3.744484768257339,
+      "maxDD_%": -7.474649078268991,
+      "sharpe_anual_ref": -0.9863494464179353,
+      "entradas": 2,
+      "salidas": 2,
+      "exposicion_%": 33.87096774193548,
+      "eq_inicio": 41621.01723285871,
+      "eq_fin": 40062.52458218055,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "BH",
+      "retorno_%": 16.018155061527462,
+      "maxDD_%": -14.802327497826928,
+      "sharpe_anual_ref": 1.6556243381845117,
+      "entradas": 0,
+      "salidas": 0,
+      "exposicion_%": 100.0,
+      "eq_inicio": 149119.55585210343,
+      "eq_fin": 173005.7575355544,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "CCI",
+      "retorno_%": 10.454310348611283,
+      "maxDD_%": -9.669770771361508,
+      "sharpe_anual_ref": 1.347138667674021,
+      "entradas": 5,
+      "salidas": 5,
+      "exposicion_%": 53.584229390681,
+      "eq_inicio": 12283.69983005888,
+      "eq_fin": 13567.875932585073,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "RSI",
+      "retorno_%": 1.9175999896191787,
+      "maxDD_%": -3.2482955915315137,
+      "sharpe_anual_ref": 0.3208115788021929,
+      "entradas": 12,
+      "salidas": 12,
+      "exposicion_%": 27.956989247311824,
+      "eq_inicio": 16490.456611008824,
+      "eq_fin": 16806.677605269684,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "E2C",
+      "retorno_%": 2.381429868166851,
+      "maxDD_%": -2.7663330971759326,
+      "sharpe_anual_ref": 0.5630750221273164,
+      "entradas": 8,
+      "salidas": 9,
+      "exposicion_%": 6.451612903225806,
+      "eq_inicio": 8639.865324118446,
+      "eq_fin": 8845.617657516394,
+      "n_velas": 558
+    },
+    {
+      "estrategia": "E2A_A1",
+      "retorno_%": 0.0,
+      "maxDD_%": 0.0,
+      "sharpe_anual_ref": 0.0,
+      "entradas": 0,
+      "salidas": 0,
+      "exposicion_%": 0.0,
+      "eq_inicio": 7648.858813004962,
+      "eq_fin": 7648.858813004962,
+      "n_velas": 558
+    }
+  ]
+}

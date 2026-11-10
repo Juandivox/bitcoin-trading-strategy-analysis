@@ -12,6 +12,7 @@ Documentación del pipeline:
 - `DOSSIER_TESIS.md` — dossier pedagógico de sustentación (PDF: `scripts/md_to_pdf_dossier.py`)
 - `PRUEBA_HIPOTESIS.md` — prueba de hipótesis SMA vs A2 vs BH (PDF: `scripts/md_to_pdf_hipotesis.py`)
 - `PERIODO_2026-09-28_2026-10-28.md` — desempeño del mes posterior al dataset (PDF: `scripts/md_to_pdf_periodo.py`)
+- `PERIODO_3M_2026-08-09_2026-11-09.md` — desempeño de los últimos 3 meses (PDF: `scripts/md_to_pdf_periodo_3m.py`)
 - `tesis_resultados/` y `tesis_resultados_v2/` — snapshots históricos (rf=0, Sortino, métricas por vela).
   **No se regeneran**: la fuente vigente es v3.
 
